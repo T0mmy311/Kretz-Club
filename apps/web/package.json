@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate --schema=../../packages/db/prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -35,6 +35,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "autoprefixer": "^10.4.27",
+    "prisma": "latest",
     "typescript": "latest"
   }
 }
