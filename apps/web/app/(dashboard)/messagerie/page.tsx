@@ -3,17 +3,23 @@
 import Link from "next/link";
 import { Hash, MessageSquare } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
-import { cn } from "@/lib/utils";
 
 const channelGroups = [
-  { label: "Le Cercle", emoji: "🏛️" },
-  { label: "Le Grand Salon", emoji: "💬" },
-  { label: "Thematiques", emoji: "📌" },
-  { label: "Aide", emoji: "❓" },
+  { key: "le_cercle", label: "Le Cercle", emoji: "🏛️" },
+  { key: "le_grand_salon", label: "Le Grand Salon", emoji: "💬" },
+  { key: "thematiques", label: "Thématiques", emoji: "📌" },
+  { key: "aide", label: "Aide", emoji: "❓" },
 ];
 
+interface Channel {
+  id: string;
+  name: string;
+  displayName: string;
+  unreadCount: number;
+}
+
 export default function MessageriePage() {
-  const { data: channels, isLoading } = trpc.channel.list.useQuery();
+  const { data: channelsByCategory, isLoading } = trpc.channel.list.useQuery();
 
   return (
     <div className="flex h-full">
@@ -34,27 +40,35 @@ export default function MessageriePage() {
               ))}
             </div>
           ) : (
-            channelGroups.map((group) => (
-              <div key={group.label}>
-                <p className="mb-1 px-2 text-xs font-semibold uppercase text-muted-foreground">
-                  {group.emoji} {group.label}
-                </p>
-                {channels
-                  ?.filter(
-                    (c: { category: string }) => c.category === group.label
-                  )
-                  .map((channel: { id: string; name: string }) => (
+            channelGroups.map((group) => {
+              const groupChannels =
+                (channelsByCategory as Record<string, Channel[]> | undefined)?.[
+                  group.key
+                ] ?? [];
+
+              return (
+                <div key={group.key}>
+                  <p className="mb-1 px-2 text-xs font-semibold uppercase text-muted-foreground">
+                    {group.emoji} {group.label}
+                  </p>
+                  {groupChannels.map((channel) => (
                     <Link
                       key={channel.id}
                       href={`/messagerie/${channel.id}`}
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     >
                       <Hash className="h-3.5 w-3.5" />
-                      {channel.name}
+                      {channel.displayName}
+                      {channel.unreadCount > 0 && (
+                        <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+                          {channel.unreadCount}
+                        </span>
+                      )}
                     </Link>
                   ))}
-              </div>
-            ))
+                </div>
+              );
+            })
           )}
         </div>
       </div>
@@ -64,10 +78,10 @@ export default function MessageriePage() {
         <div className="text-center text-muted-foreground">
           <MessageSquare className="mx-auto h-12 w-12 opacity-20" />
           <p className="mt-4 text-lg font-medium">
-            Selectionnez un channel
+            {"S\u00e9lectionnez un channel"}
           </p>
           <p className="mt-1 text-sm">
-            Choisissez un channel pour commencer a discuter
+            {"Choisissez un channel pour commencer \u00e0 discuter"}
           </p>
         </div>
       </div>

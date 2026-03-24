@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-export default function ConnexionPage() {
+export default function InscriptionPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -18,15 +20,38 @@ export default function ConnexionPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError("Email ou mot de passe incorrect");
+    if (password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères");
       setLoading(false);
       return;
+    }
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { first_name: firstName, last_name: lastName },
+      },
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+      setLoading(false);
+      return;
+    }
+
+    // Auto-create member in DB via API
+    if (data.user) {
+      await fetch("/api/auth/create-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          supabaseAuthId: data.user.id,
+          email,
+          firstName,
+          lastName,
+        }),
+      });
     }
 
     router.push("/messagerie");
@@ -38,11 +63,46 @@ export default function ConnexionPage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">Kretz Club</h1>
         <p className="mt-2 text-muted-foreground">
-          {"Connectez-vous pour acc\u00e9der au club"}
+          {"Cr\u00e9ez votre compte"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              htmlFor="firstName"
+              className="block text-sm font-medium text-foreground"
+            >
+              {"Pr\u00e9nom"}
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="lastName"
+              className="block text-sm font-medium text-foreground"
+            >
+              Nom
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </div>
+
         <div>
           <label
             htmlFor="email"
@@ -73,7 +133,7 @@ export default function ConnexionPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Votre mot de passe"
+            placeholder="Minimum 6 caractères"
             required
             className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
           />
@@ -88,14 +148,14 @@ export default function ConnexionPage() {
           disabled={loading}
           className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
-          {loading ? "Connexion..." : "Se connecter"}
+          {loading ? "Création..." : "Créer mon compte"}
         </button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
-        {"Pas encore membre ? "}
-        <Link href="/inscription" className="font-medium text-foreground hover:underline">
-          {"Cr\u00e9er un compte"}
+        {"Déjà membre ? "}
+        <Link href="/connexion" className="font-medium text-foreground hover:underline">
+          Se connecter
         </Link>
       </p>
     </div>

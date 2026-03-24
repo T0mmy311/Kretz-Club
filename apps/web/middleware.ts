@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const publicPaths = ["/connexion", "/verification", "/api/auth/callback"];
+const publicPaths = ["/connexion", "/inscription", "/verification", "/api/auth", "/api/trpc"];
 
 export async function middleware(request: NextRequest) {
   const { user, supabaseResponse } = await updateSession(request);
@@ -9,8 +9,13 @@ export async function middleware(request: NextRequest) {
 
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
+  // In dev, allow bypass via ?bypass=1 query param
+  const bypassAuth =
+    process.env.NODE_ENV === "development" &&
+    request.nextUrl.searchParams.get("bypass") === "1";
+
   // Redirect unauthenticated users to /connexion
-  if (!user && !isPublicPath) {
+  if (!user && !isPublicPath && !bypassAuth) {
     const url = request.nextUrl.clone();
     url.pathname = "/connexion";
     return NextResponse.redirect(url);

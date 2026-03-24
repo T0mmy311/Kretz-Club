@@ -80,11 +80,19 @@ async function main() {
   ];
 
   for (const channel of channels) {
-    await prisma.channel.upsert({
-      where: { id: channel.name },
-      update: channel,
-      create: channel,
+    // Use name as unique identifier for upsert
+    const existing = await prisma.channel.findFirst({
+      where: { name: channel.name },
     });
+
+    if (existing) {
+      await prisma.channel.update({
+        where: { id: existing.id },
+        data: channel,
+      });
+    } else {
+      await prisma.channel.create({ data: channel });
+    }
   }
 
   console.log(`Seeded ${channels.length} channels.`);
