@@ -6,23 +6,15 @@ import { trpc } from "@/lib/trpc/client";
 
 export default function AnnuairePage() {
   const [search, setSearch] = useState("");
-  const { data: members, isLoading } = trpc.member.list.useQuery();
+  const { data } = trpc.member.list.useQuery({});
+  const { data: searchData, isLoading } = trpc.member.search.useQuery(
+    { query: search },
+    { enabled: search.length > 0 }
+  );
 
-  const filteredMembers = search
-    ? (
-        members as Array<{
-          firstName?: string;
-          lastName?: string;
-          profession?: string;
-          company?: string;
-        }>
-      )?.filter(
-        (m) =>
-          `${m.firstName} ${m.lastName} ${m.profession} ${m.company}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-      )
-    : members;
+  const members = search.length > 0
+    ? (searchData?.items ?? [])
+    : (data?.items ?? []);
 
   const getInitials = (firstName?: string, lastName?: string) => {
     return `${(firstName || "?")[0]}${(lastName || "")[0] || ""}`.toUpperCase();
@@ -61,15 +53,7 @@ export default function AnnuairePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {(
-            filteredMembers as Array<{
-              id: string;
-              firstName?: string;
-              lastName?: string;
-              profession?: string;
-              company?: string;
-            }>
-          )?.map((member) => (
+          {members.map((member: any) => (
             <div
               key={member.id}
               className="flex flex-col items-center rounded-xl border bg-card p-6 text-center shadow-sm"

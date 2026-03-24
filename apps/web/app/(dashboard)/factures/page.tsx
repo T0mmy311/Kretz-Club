@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc/client";
 
 export default function FacturesPage() {
   const { data: invoices, isLoading } = trpc.invoice.list.useQuery();
+  const items = invoices ?? [];
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("fr-FR", {
@@ -55,33 +56,24 @@ export default function FacturesPage() {
               </tr>
             </thead>
             <tbody>
-              {(
-                invoices as Array<{
-                  id: string;
-                  number: string;
-                  date: string;
-                  description: string;
-                  amount: number;
-                  pdfUrl?: string;
-                }>
-              )?.map((invoice) => (
+              {items.map((invoice: any) => (
                 <tr key={invoice.id} className="border-b last:border-0">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">
-                        {invoice.number}
+                        {invoice.invoiceNumber}
                       </span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
-                    {formatDate(invoice.date)}
+                    {formatDate(invoice.issuedAt)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {invoice.description}
+                    {invoice.description ?? invoice.event?.title ?? "-"}
                   </td>
                   <td className="px-4 py-3 text-right text-sm font-medium">
-                    {invoice.amount.toLocaleString("fr-FR")} EUR
+                    {Number(invoice.totalAmount).toLocaleString("fr-FR")} {"\u20ac"}
                   </td>
                   <td className="px-4 py-3 text-right">
                     {invoice.pdfUrl && (

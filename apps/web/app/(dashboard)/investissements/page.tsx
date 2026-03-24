@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp, MapPin, ExternalLink } from "lucide-react";
+import { TrendingUp, MapPin, ExternalLink, Users, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -9,52 +9,54 @@ const tabs = [
   { label: "Tous", value: "all" },
   { label: "Ouverts", value: "open" },
   { label: "En financement", value: "funding" },
-  { label: "Finances", value: "funded" },
+  { label: "Financ\u00e9s", value: "funded" },
+  { label: "Cl\u00f4tur\u00e9s", value: "closed" },
 ];
+
+function formatAmount(amount: any) {
+  const num = typeof amount === "object" ? Number(amount) : Number(amount || 0);
+  return num.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+}
+
+function getStatusLabel(status: string) {
+  const map: Record<string, string> = {
+    draft: "Brouillon",
+    open: "Ouvert",
+    funding: "En financement",
+    funded: "Financ\u00e9",
+    closed: "Cl\u00f4tur\u00e9",
+    cancelled: "Annul\u00e9",
+  };
+  return map[status] ?? status;
+}
+
+function getStatusColor(status: string) {
+  const map: Record<string, string> = {
+    open: "bg-green-100 text-green-800",
+    funding: "bg-blue-100 text-blue-800",
+    funded: "bg-purple-100 text-purple-800",
+    closed: "bg-gray-100 text-gray-800",
+    draft: "bg-yellow-100 text-yellow-800",
+    cancelled: "bg-red-100 text-red-800",
+  };
+  return map[status] ?? "bg-gray-100 text-gray-800";
+}
 
 export default function InvestissementsPage() {
   const [activeTab, setActiveTab] = useState("all");
-  const { data: investments, isLoading } = trpc.investment.list.useQuery();
+  const { data, isLoading } = trpc.investment.list.useQuery({});
 
-  const filteredInvestments =
-    activeTab === "all"
-      ? investments
-      : (
-          investments as Array<{ status: string }>
-        )?.filter((i) => i.status === activeTab);
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "open":
-        return "Ouvert";
-      case "funding":
-        return "En financement";
-      case "funded":
-        return "Finance";
-      default:
-        return status;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-green-100 text-green-800";
-      case "funding":
-        return "bg-blue-100 text-blue-800";
-      case "funded":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const investments = data?.items ?? [];
+  const filtered = activeTab === "all"
+    ? investments
+    : investments.filter((i: any) => i.status === activeTab);
 
   return (
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold">Investissements</h2>
         <p className="mt-1 text-muted-foreground">
-          Decouvrez les opportunites d&apos;investissement du club
+          {"D\u00e9couvrez les opportunit\u00e9s d\u2019investissement du Kretz Club"}
         </p>
       </div>
 
@@ -78,43 +80,47 @@ export default function InvestissementsPage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="h-72 animate-pulse rounded-xl border bg-muted"
-            />
-          ))}
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
+          <TrendingUp className="h-12 w-12 opacity-20" />
+          <p className="mt-4 text-lg font-medium">
+            {"Aucun investissement"}
+          </p>
+          <p className="mt-1 text-sm">
+            {activeTab === "all"
+              ? "Les deals appara\u00eetront ici d\u00e8s qu\u2019ils seront publi\u00e9s"
+              : "Aucun deal avec ce statut"}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {(
-            filteredInvestments as Array<{
-              id: string;
-              title: string;
-              location?: string;
-              status: string;
-              currentAmount?: number;
-              targetAmount?: number;
-              coverUrl?: string;
-            }>
-          )?.map((investment) => (
-            <div
-              key={investment.id}
-              className="overflow-hidden rounded-xl border bg-card shadow-sm"
-            >
-              {/* Cover */}
-              <div className="flex h-40 items-center justify-center bg-muted">
-                <TrendingUp className="h-10 w-10 text-muted-foreground/30" />
-              </div>
+          {filtered.map((investment: any) => {
+            const target = Number(investment.targetAmount || 0);
+            const current = Number(investment.currentAmount || 0);
+            const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
 
-              {/* Content */}
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold">{investment.title}</h3>
+            return (
+              <div
+                key={investment.id}
+                className="overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md"
+              >
+                {/* Cover */}
+                <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                  {investment.coverImageUrl ? (
+                    <img
+                      src={investment.coverImageUrl}
+                      alt={investment.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <TrendingUp className="h-10 w-10 text-muted-foreground/30" />
+                  )}
                   <span
                     className={cn(
-                      "flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
+                      "absolute right-3 top-3 rounded-full px-2.5 py-0.5 text-xs font-medium",
                       getStatusColor(investment.status)
                     )}
                   >
@@ -122,50 +128,73 @@ export default function InvestissementsPage() {
                   </span>
                 </div>
 
-                {investment.location && (
-                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {investment.location}
-                  </p>
-                )}
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="font-semibold leading-tight">{investment.title}</h3>
 
-                {/* Progress bar */}
-                {investment.targetAmount && (
-                  <div className="mt-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium">
-                        {(investment.currentAmount || 0).toLocaleString(
-                          "fr-FR"
-                        )}{" "}
-                        EUR
-                      </span>
-                      <span className="text-muted-foreground">
-                        {investment.targetAmount.toLocaleString("fr-FR")} EUR
-                      </span>
+                  {investment.location && (
+                    <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {investment.location}
+                    </p>
+                  )}
+
+                  {investment.description && (
+                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                      {investment.description}
+                    </p>
+                  )}
+
+                  {/* Progress bar */}
+                  {target > 0 && (
+                    <div className="mt-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium">{formatAmount(current)}</span>
+                        <span className="text-muted-foreground">{formatAmount(target)}</span>
+                      </div>
+                      <div className="mt-1.5 h-2 rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="mt-1.5 h-2 rounded-full bg-muted">
-                      <div
-                        className="h-full rounded-full bg-primary transition-all"
-                        style={{
-                          width: `${Math.min(
-                            100,
-                            ((investment.currentAmount || 0) /
-                              investment.targetAmount) *
-                              100
-                          )}%`,
-                        }}
-                      />
-                    </div>
+                  )}
+
+                  {/* Minimum ticket */}
+                  {investment.minimumTicket && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {"Ticket min. : "}{formatAmount(investment.minimumTicket)}
+                    </p>
+                  )}
+
+                  {/* Interest count */}
+                  <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    {investment._count?.memberInvestments ?? 0} {"int\u00e9ress\u00e9(s)"}
                   </div>
-                )}
 
-                <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent">
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Voir le deck
-                </button>
+                  {/* CTA */}
+                  <div className="mt-4 flex gap-2">
+                    {investment.deckUrl && (
+                      <a
+                        href={investment.deckUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Voir le deck
+                      </a>
+                    )}
+                    <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent">
+                      {"D\u00e9tails"}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

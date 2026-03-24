@@ -4,7 +4,8 @@ import { Image as ImageIcon } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 
 export default function GaleriePage() {
-  const { data: albums, isLoading } = trpc.gallery.listAlbums.useQuery();
+  const { data, isLoading } = trpc.gallery.listAlbums.useQuery({});
+  const albums = data?.items ?? [];
 
   return (
     <div className="p-6">
@@ -26,14 +27,7 @@ export default function GaleriePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {(
-            albums as Array<{
-              id: string;
-              title: string;
-              photoCount?: number;
-              coverUrl?: string;
-            }>
-          )?.map((album) => (
+          {albums.map((album: any) => (
             <div
               key={album.id}
               className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md"
@@ -49,8 +43,8 @@ export default function GaleriePage() {
                   {album.title}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {album.photoCount || 0} photo
-                  {(album.photoCount || 0) > 1 ? "s" : ""}
+                  {album._count?.photos ?? 0} photo
+                  {(album._count?.photos ?? 0) > 1 ? "s" : ""}
                 </p>
               </div>
             </div>

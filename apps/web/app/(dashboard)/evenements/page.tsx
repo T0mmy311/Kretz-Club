@@ -12,17 +12,10 @@ const tabs = [
 
 export default function EvenementsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
-  const { data: events, isLoading } = trpc.event.list.useQuery();
-
-  const now = new Date();
-  const filteredEvents =
-    activeTab === "upcoming"
-      ? (events as Array<{ date: string }>)?.filter(
-          (e) => new Date(e.date) >= now
-        )
-      : (events as Array<{ date: string }>)?.filter(
-          (e) => new Date(e.date) < now
-        );
+  const { data, isLoading } = trpc.event.list.useQuery({
+    status: activeTab as "upcoming" | "past",
+  });
+  const events = data?.items ?? [];
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("fr-FR", {
@@ -74,33 +67,37 @@ export default function EvenementsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {(
-            filteredEvents as Array<{
-              id: string;
-              title: string;
-              date: string;
-              location?: string;
-              price?: number;
-              coverUrl?: string;
-            }>
-          )?.map((event) => (
+          {events.map((event: any) => (
             <div
               key={event.id}
-              className="overflow-hidden rounded-xl border bg-card shadow-sm"
+              className="overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md"
             >
               {/* Cover */}
-              <div className="flex h-40 items-center justify-center bg-muted">
-                <Calendar className="h-10 w-10 text-muted-foreground/30" />
+              <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                {event.coverImageUrl ? (
+                  <img src={event.coverImageUrl} alt={event.title} className="h-full w-full object-cover" />
+                ) : (
+                  <Calendar className="h-10 w-10 text-muted-foreground/30" />
+                )}
+                {event.maxAttendees && (
+                  <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-medium">
+                    {event._count?.registrations ?? 0}/{event.maxAttendees} places
+                  </span>
+                )}
               </div>
 
               {/* Content */}
               <div className="p-4">
                 <h3 className="font-semibold">{event.title}</h3>
 
-                <div className="mt-2 space-y-1.5">
+                {event.description && (
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{event.description}</p>
+                )}
+
+                <div className="mt-3 space-y-1.5">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5" />
-                    {formatDate(event.date)}
+                    {formatDate(event.startsAt)}
                   </p>
 
                   {event.location && (
@@ -110,18 +107,16 @@ export default function EvenementsPage() {
                     </p>
                   )}
 
-                  {event.price !== undefined && (
-                    <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Euro className="h-3.5 w-3.5" />
-                      {event.price === 0
-                        ? "Gratuit"
-                        : `${event.price.toLocaleString("fr-FR")} EUR`}
-                    </p>
-                  )}
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Euro className="h-3.5 w-3.5" />
+                    {Number(event.price) === 0
+                      ? "Gratuit"
+                      : `${Number(event.price).toLocaleString("fr-FR")} \u20ac`}
+                  </p>
                 </div>
 
                 <button className="mt-4 w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                  S&apos;inscrire
+                  {"S\u2019inscrire"}
                 </button>
               </div>
             </div>
