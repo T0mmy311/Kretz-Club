@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Kretz Club",
+    "slug": "kretz-club",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "kretzclub",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kretz.club"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.kretz.club"
+    },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}

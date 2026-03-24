@@ -1,0 +1,25 @@
+{
+  "name": "kretz-club",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:web": "turbo dev --filter=@kretz/web",
+    "dev:mobile": "turbo dev --filter=@kretz/mobile",
+    "db:generate": "npm -w @kretz/db run generate",
+    "db:push": "npm -w @kretz/db run push",
+    "db:seed": "npm -w @kretz/db run seed"
+  },
+  "devDependencies": {
+    "turbo": "^2"
+  },
+  "packageManager": "npm@11.9.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

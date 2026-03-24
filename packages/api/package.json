@@ -1,0 +1,20 @@
+{
+  "name": "@kretz/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@kretz/db": "*",
+    "@kretz/shared": "*",
+    "@kretz/payments": "*",
+    "@trpc/server": "^11.0.0",
+    "superjson": "^2.2.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
