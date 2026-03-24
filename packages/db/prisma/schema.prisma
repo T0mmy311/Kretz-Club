@@ -23,6 +23,7 @@ model Member {
   bio            String?
   company        String?
   phone          String?
+  city           String?
   linkedinUrl    String?  @map("linkedin_url")
   isAdmin        Boolean  @default(false) @map("is_admin")
   isActive       Boolean  @default(true) @map("is_active")

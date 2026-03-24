@@ -13,6 +13,7 @@ export const updateProfileSchema = z.object({
   bio: z.string().max(500, "Bio trop longue").optional(),
   company: z.string().optional(),
   phone: z.string().optional(),
+  city: z.string().optional(),
   linkedinUrl: z.string().url("URL LinkedIn invalide").optional().or(z.literal("")),
 });
 

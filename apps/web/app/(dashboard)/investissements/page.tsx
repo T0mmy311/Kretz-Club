@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 const tabs = [
   { label: "Tous", value: "all" },
   { label: "Ouverts", value: "open" },
-  { label: "En financement", value: "funding" },
   { label: "Financ\u00e9s", value: "funded" },
   { label: "Cl\u00f4tur\u00e9s", value: "closed" },
 ];
@@ -22,7 +21,7 @@ function getStatusLabel(status: string) {
   const map: Record<string, string> = {
     draft: "Brouillon",
     open: "Ouvert",
-    funding: "En financement",
+    funding: "Ouvert",
     funded: "Financ\u00e9",
     closed: "Cl\u00f4tur\u00e9",
     cancelled: "Annul\u00e9",
@@ -33,7 +32,7 @@ function getStatusLabel(status: string) {
 function getStatusColor(status: string) {
   const map: Record<string, string> = {
     open: "bg-green-100 text-green-800",
-    funding: "bg-blue-100 text-blue-800",
+    funding: "bg-green-100 text-green-800",
     funded: "bg-purple-100 text-purple-800",
     closed: "bg-gray-100 text-gray-800",
     draft: "bg-yellow-100 text-yellow-800",
@@ -49,6 +48,8 @@ export default function InvestissementsPage() {
   const investments = data?.items ?? [];
   const filtered = activeTab === "all"
     ? investments
+    : activeTab === "open"
+    ? investments.filter((i: any) => i.status === "open" || i.status === "funding")
     : investments.filter((i: any) => i.status === activeTab);
 
   return (

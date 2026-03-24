@@ -24,6 +24,7 @@ export default function ProfilPage() {
     bio: "",
     company: "",
     phone: "",
+    city: "",
     linkedinUrl: "",
   });
 
@@ -36,6 +37,7 @@ export default function ProfilPage() {
         bio?: string;
         company?: string;
         phone?: string;
+        city?: string;
         linkedinUrl?: string;
       };
       setForm({
@@ -45,6 +47,7 @@ export default function ProfilPage() {
         bio: p.bio || "",
         company: p.company || "",
         phone: p.phone || "",
+        city: p.city || "",
         linkedinUrl: p.linkedinUrl || "",
       });
     }
@@ -143,6 +146,17 @@ export default function ProfilPage() {
             value={form.phone}
             onChange={handleChange}
             type="tel"
+            className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Ville</label>
+          <input
+            name="city"
+            value={form.city}
+            onChange={handleChange}
+            placeholder="Paris, Lyon, Marseille..."
             className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>

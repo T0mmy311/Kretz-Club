@@ -61,6 +61,7 @@ export const memberRouter = router({
           bio: input.bio,
           company: input.company,
           phone: input.phone,
+          city: input.city,
           linkedinUrl: input.linkedinUrl || null,
         },
       });
@@ -87,6 +88,7 @@ export const memberRouter = router({
             { lastName: { contains: query, mode: "insensitive" } },
             { profession: { contains: query, mode: "insensitive" } },
             { company: { contains: query, mode: "insensitive" } },
+            { city: { contains: query, mode: "insensitive" } },
           ],
         },
         take: limit + 1,
@@ -100,6 +102,7 @@ export const memberRouter = router({
           profession: true,
           company: true,
           bio: true,
+          city: true,
           joinedAt: true,
         },
       });
@@ -136,6 +139,7 @@ export const memberRouter = router({
           profession: true,
           company: true,
           bio: true,
+          city: true,
           joinedAt: true,
         },
       });
