@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, MapPin, Euro } from "lucide-react";
+import { Calendar, MapPin, Euro, CalendarPlus } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -115,9 +115,29 @@ export default function EvenementsPage() {
                   </p>
                 </div>
 
-                <button className="mt-4 w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                  {"S\u2019inscrire"}
-                </button>
+                <div className="mt-4 flex gap-2">
+                  <button className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                    {"S\u2019inscrire"}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const res = await fetch(`/api/events/${event.id}/ics`);
+                      if (res.ok) {
+                        const blob = await res.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `${event.title.replace(/[^a-zA-Z0-9]/g, "-")}.ics`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }
+                    }}
+                    className="flex items-center justify-center rounded-lg border px-3 py-2 text-sm hover:bg-accent"
+                    title="Ajouter au calendrier"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

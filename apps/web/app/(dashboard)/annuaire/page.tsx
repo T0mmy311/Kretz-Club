@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Building2 } from "lucide-react";
+import { Search, Building2, MessageSquare, Linkedin } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
 
 export default function AnnuairePage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
+
+  const createConversation = trpc.conversation.create.useMutation({
+    onSuccess: (data) => {
+      router.push(`/messagerie/dm/${data.id}`);
+    },
+  });
   const { data } = trpc.member.list.useQuery({});
   const { data: searchData, isLoading } = trpc.member.search.useQuery(
     { query: search },
@@ -75,6 +83,13 @@ export default function AnnuairePage() {
                   {member.company}
                 </p>
               )}
+              <button
+                onClick={() => createConversation.mutate({ memberId: member.id })}
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                <MessageSquare className="h-3 w-3" />
+                Envoyer un message
+              </button>
             </div>
           ))}
         </div>
