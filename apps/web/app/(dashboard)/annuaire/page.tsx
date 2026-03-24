@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Building2, MessageSquare, MapPin, Briefcase, X } from "lucide-react";
+import { Search, Building2, MessageSquare, MapPin, Briefcase, X, Pencil } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,9 @@ export default function AnnuairePage() {
   const [search, setSearch] = useState("");
   const [filterCity, setFilterCity] = useState("");
   const [filterProfession, setFilterProfession] = useState("");
+
+  const { data: meData } = trpc.member.me.useQuery();
+  const currentMemberId = (meData as any)?.id;
 
   const { data } = trpc.member.list.useQuery({});
   const { data: searchData, isLoading } = trpc.member.search.useQuery(
@@ -191,13 +195,23 @@ export default function AnnuairePage() {
                   {member.city}
                 </p>
               )}
-              <button
-                onClick={() => createConversation.mutate({ memberId: member.id })}
-                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border/50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                <MessageSquare className="h-3 w-3" />
-                Envoyer un message
-              </button>
+              {currentMemberId === member.id ? (
+                <Link
+                  href="/profil"
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg gradient-gold px-3 py-1.5 text-xs font-semibold text-black hover:opacity-90 transition-opacity"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Modifier ma fiche
+                </Link>
+              ) : (
+                <button
+                  onClick={() => createConversation.mutate({ memberId: member.id })}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border/50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <MessageSquare className="h-3 w-3" />
+                  Envoyer un message
+                </button>
+              )}
             </div>
           ))}
         </div>

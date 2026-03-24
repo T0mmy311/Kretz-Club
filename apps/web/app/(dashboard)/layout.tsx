@@ -81,9 +81,7 @@ export default function DashboardLayout({
       <aside className="hidden lg:flex w-64 flex-col border-r border-border/50 bg-card">
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-border/50 px-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-gold">
-            <Crown className="h-4 w-4 text-black" />
-          </div>
+          <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-8 w-8" />
           <h1 className="text-xl font-bold tracking-tight text-gradient-gold">Kretz Club</h1>
         </div>
 
@@ -133,9 +131,7 @@ export default function DashboardLayout({
       {/* Mobile Header */}
       <header className="flex lg:hidden items-center justify-between border-b border-border/50 bg-card px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg gradient-gold">
-            <Crown className="h-3.5 w-3.5 text-black" />
-          </div>
+          <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-7 w-7" />
           <h1 className="text-lg font-bold text-gradient-gold">Kretz Club</h1>
         </div>
         <Link href="/profil" className="flex h-8 w-8 items-center justify-center rounded-full gradient-gold text-xs font-bold text-black">

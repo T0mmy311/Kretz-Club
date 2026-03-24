@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Crown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ConnexionPage() {
@@ -34,9 +34,7 @@ export default function ConnexionPage() {
   return (
     <div className="w-full max-w-md space-y-8 rounded-2xl border border-border/50 bg-card p-8 shadow-2xl shadow-primary/5">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl gradient-gold">
-          <Crown className="h-7 w-7 text-black" />
-        </div>
+        <img src="/logo-kretz-club.svg" alt="Kretz Club" className="mx-auto mb-4 h-14 w-14" />
         <h1 className="text-3xl font-bold tracking-tight text-gradient-gold">Kretz Club</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {"Connectez-vous pour acc\u00e9der au club"}
