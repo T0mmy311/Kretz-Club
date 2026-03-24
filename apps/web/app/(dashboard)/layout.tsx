@@ -11,7 +11,6 @@ import {
   Image,
   FileText,
   LogOut,
-  Crown,
   Menu,
   X,
 } from "lucide-react";
@@ -27,7 +26,6 @@ const navigation = [
   { name: "Factures", href: "/factures", icon: FileText },
 ];
 
-// Bottom nav shows only the 5 most important items on mobile
 const mobileNav = [
   { name: "Messages", href: "/messagerie", icon: MessageSquare },
   { name: "Deals", href: "/investissements", icon: TrendingUp },
@@ -60,7 +58,6 @@ export default function DashboardLayout({
     getUser();
   }, [supabase]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
@@ -77,73 +74,75 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen flex-col lg:flex-row">
-      {/* Desktop Sidebar - hidden on mobile */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-border/50 bg-card">
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-60 flex-col border-r border-white/[0.06] bg-[hsl(0,0%,4%)]">
         {/* Logo */}
-        <div className="flex h-16 items-center gap-3 border-b border-border/50 px-6">
-          <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-8 w-8" />
-          <h1 className="text-xl font-bold tracking-tight text-gradient-gold">Kretz Club</h1>
+        <div className="flex h-14 items-center gap-3 px-5">
+          <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-7 w-7 opacity-90" />
+          <span className="text-[15px] font-semibold tracking-tight text-white/90">Kretz Club</span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3">
-          {navigation.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-primary/10 text-primary shadow-sm shadow-primary/5"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                <item.icon className={cn("h-4 w-4", isActive && "text-primary")} />
-                {item.name}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 px-3 pt-2">
+          <div className="space-y-0.5">
+            {navigation.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
+                    isActive
+                      ? "bg-white/[0.08] text-white"
+                      : "text-white/40 hover:bg-white/[0.04] hover:text-white/70"
+                  )}
+                >
+                  <item.icon className={cn("h-[18px] w-[18px]", isActive ? "text-white/80" : "text-white/30")} />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
 
-        {/* User section */}
-        <div className="border-t border-border/50 p-3">
-          <Link href="/profil" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-accent transition-colors">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-gold text-xs font-bold text-black">
+        {/* User */}
+        <div className="border-t border-white/[0.06] p-3">
+          <Link href="/profil" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-white/[0.04] transition-colors">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/70">
               {getInitials(user?.name)}
             </div>
-            <div className="flex-1 truncate">
-              <p className="truncate text-sm font-medium">{user?.name || "..."}</p>
-              <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-[13px] font-medium text-white/80">{user?.name || "..."}</p>
+              <p className="truncate text-[11px] text-white/30">{user?.email}</p>
             </div>
           </Link>
           <button
             onClick={handleSignOut}
-            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="mt-0.5 flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] text-white/30 hover:bg-white/[0.04] hover:text-white/50 transition-colors"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-[16px] w-[16px]" />
             {"Se d\u00e9connecter"}
           </button>
         </div>
       </aside>
 
       {/* Mobile Header */}
-      <header className="flex lg:hidden items-center justify-between border-b border-border/50 bg-card px-4 py-3">
-        <div className="flex items-center gap-2">
-          <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-7 w-7" />
-          <h1 className="text-lg font-bold text-gradient-gold">Kretz Club</h1>
+      <header className="flex lg:hidden items-center justify-between border-b border-white/[0.06] bg-[hsl(0,0%,4%)] px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-6 w-6 opacity-90" />
+          <span className="text-[15px] font-semibold text-white/90">Kretz Club</span>
         </div>
-        <Link href="/profil" className="flex h-8 w-8 items-center justify-center rounded-full gradient-gold text-xs font-bold text-black">
+        <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70">
           {getInitials(user?.name)}
         </Link>
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto pb-16 lg:pb-0">{children}</main>
+      <main className="flex-1 overflow-auto bg-background pb-16 lg:pb-0">{children}</main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg safe-area-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-white/[0.06] bg-[hsl(0,0%,4%)]/95 backdrop-blur-xl safe-area-bottom">
         {mobileNav.map((item) => {
           if (item.name === "Plus") {
             return (
@@ -151,8 +150,8 @@ export default function DashboardLayout({
                 key="plus"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className={cn(
-                  "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
-                  mobileMenuOpen ? "text-primary" : "text-muted-foreground"
+                  "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors",
+                  mobileMenuOpen ? "text-white" : "text-white/30"
                 )}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -166,8 +165,8 @@ export default function DashboardLayout({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
-                isActive ? "text-primary" : "text-muted-foreground"
+                "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors",
+                isActive ? "text-white" : "text-white/30"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -177,12 +176,12 @@ export default function DashboardLayout({
         })}
       </nav>
 
-      {/* Mobile "Plus" menu overlay */}
+      {/* Mobile "Plus" menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute bottom-16 left-0 right-0 rounded-t-2xl border-t border-border/50 bg-card p-4 safe-area-bottom">
-            <div className="mb-4 grid grid-cols-3 gap-3">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute bottom-16 left-0 right-0 rounded-t-2xl border-t border-white/[0.06] bg-[hsl(0,0%,5%)] p-4 safe-area-bottom animate-fade-in">
+            <div className="mb-4 grid grid-cols-3 gap-2.5">
               {[
                 { name: "Galerie", href: "/galerie", icon: Image },
                 { name: "Factures", href: "/factures", icon: FileText },
@@ -193,18 +192,18 @@ export default function DashboardLayout({
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border border-border/50 p-4 text-sm transition-colors hover:bg-accent",
-                    pathname.startsWith(item.href) && "border-primary/50 bg-primary/5 text-primary"
+                    "flex flex-col items-center gap-2 rounded-xl border border-white/[0.06] p-4 text-sm transition-colors hover:bg-white/[0.04]",
+                    pathname.startsWith(item.href) && "border-white/[0.12] bg-white/[0.04]"
                   )}
                 >
-                  <item.icon className="h-6 w-6" />
-                  <span className="text-xs font-medium">{item.name}</span>
+                  <item.icon className="h-5 w-5 text-white/50" />
+                  <span className="text-[11px] font-medium text-white/60">{item.name}</span>
                 </Link>
               ))}
             </div>
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/30 py-3 text-sm font-medium text-destructive hover:bg-destructive/10"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.06] py-3 text-[13px] font-medium text-white/40 hover:bg-white/[0.04] transition-colors"
             >
               <LogOut className="h-4 w-4" />
               {"Se d\u00e9connecter"}

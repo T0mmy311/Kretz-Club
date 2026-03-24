@@ -32,18 +32,18 @@ export default function ConnexionPage() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-2xl border border-border/50 bg-card p-8 shadow-2xl shadow-primary/5">
+    <div className="w-full max-w-sm space-y-8 p-8">
       <div className="text-center">
-        <img src="/logo-kretz-club.svg" alt="Kretz Club" className="mx-auto mb-4 h-14 w-14" />
-        <h1 className="text-3xl font-bold tracking-tight text-gradient-gold">Kretz Club</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <img src="/logo-kretz-club.svg" alt="Kretz Club" className="mx-auto mb-6 h-16 w-16 opacity-90" />
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Kretz Club</h1>
+        <p className="mt-2 text-[13px] text-white/40">
           {"Connectez-vous pour acc\u00e9der au club"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">Adresse email</label>
+          <label htmlFor="email" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">Email</label>
           <input
             id="email"
             type="email"
@@ -51,37 +51,37 @@ export default function ConnexionPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="vous@exemple.com"
             required
-            className="mt-1 block w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium">Mot de passe</label>
+          <label htmlFor="password" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">Mot de passe</label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Votre mot de passe"
+            placeholder={"Votre mot de passe"}
             required
-            className="mt-1 block w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
           />
         </div>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-[13px] text-red-400">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg gradient-gold px-4 py-2.5 text-sm font-semibold text-black hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="w-full rounded-md bg-white px-4 py-2.5 text-[14px] font-semibold text-black hover:bg-white/90 disabled:opacity-50 transition-colors"
         >
           {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Se connecter"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-[13px] text-white/30">
         {"Pas encore membre ? "}
-        <Link href="/inscription" className="font-medium text-primary hover:underline">
+        <Link href="/inscription" className="font-medium text-white/60 hover:text-white transition-colors">
           {"Cr\u00e9er un compte"}
         </Link>
       </p>
