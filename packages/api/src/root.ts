@@ -8,6 +8,11 @@ import { investmentRouter } from "./routers/investment";
 import { galleryRouter } from "./routers/gallery";
 import { invoiceRouter } from "./routers/invoice";
 import { recommendationRouter } from "./routers/recommendation";
+import { reactionRouter } from "./routers/reaction";
+import { mentionRouter } from "./routers/mention";
+import { presenceRouter } from "./routers/presence";
+import { readStatusRouter } from "./routers/readStatus";
+import { adminRouter } from "./routers/admin";
 
 export const appRouter = router({
   channel: channelRouter,
@@ -19,6 +24,11 @@ export const appRouter = router({
   gallery: galleryRouter,
   invoice: invoiceRouter,
   recommendation: recommendationRouter,
+  reaction: reactionRouter,
+  mention: mentionRouter,
+  presence: presenceRouter,
+  readStatus: readStatusRouter,
+  admin: adminRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -43,6 +43,10 @@ model Member {
   invoices                Invoice[]
   givenRecommendations    Recommendation[]         @relation("RecommendationFrom")
   receivedRecommendations Recommendation[]         @relation("RecommendationTo")
+  reactions               MessageReaction[]
+  mentionedIn             MessageMention[]
+  channelReadStatuses     ChannelReadStatus[]
+  presence                MemberPresence?
 
   @@map("members")
 }
@@ -70,8 +74,9 @@ model Channel {
   sortOrder   Int             @default(0) @map("sort_order")
   createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz
 
-  messages Message[]
-  members  ChannelMember[]
+  messages     Message[]
+  members      ChannelMember[]
+  readStatuses ChannelReadStatus[]
 
   @@map("channels")
 }
@@ -90,12 +95,66 @@ model Message {
   channel      Channel?      @relation(fields: [channelId], references: [id])
   conversation Conversation? @relation(fields: [conversationId], references: [id])
   author       Member        @relation(fields: [authorId], references: [id])
-  parent       Message?      @relation("MessageThread", fields: [parentId], references: [id])
-  replies      Message[]     @relation("MessageThread")
+  parent       Message?          @relation("MessageThread", fields: [parentId], references: [id])
+  replies      Message[]         @relation("MessageThread")
+  reactions    MessageReaction[]
+  mentions     MessageMention[]
 
   @@index([channelId, createdAt(sort: Desc)])
   @@index([conversationId, createdAt(sort: Desc)])
   @@map("messages")
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  memberId  String   @map("member_id") @db.Uuid
+  emoji     String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  member  Member  @relation(fields: [memberId], references: [id])
+
+  @@unique([messageId, memberId, emoji])
+  @@map("message_reactions")
+}
+
+model MessageMention {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  memberId  String   @map("member_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  member  Member  @relation(fields: [memberId], references: [id])
+
+  @@unique([messageId, memberId])
+  @@map("message_mentions")
+}
+
+model ChannelReadStatus {
+  id            String   @id @default(uuid()) @db.Uuid
+  channelId     String   @map("channel_id") @db.Uuid
+  memberId      String   @map("member_id") @db.Uuid
+  lastReadAt    DateTime @default(now()) @map("last_read_at") @db.Timestamptz
+  lastMessageId String?  @map("last_message_id") @db.Uuid
+
+  channel Channel @relation(fields: [channelId], references: [id])
+  member  Member  @relation(fields: [memberId], references: [id])
+
+  @@unique([channelId, memberId])
+  @@map("channel_read_status")
+}
+
+model MemberPresence {
+  id        String   @id @default(uuid()) @db.Uuid
+  memberId  String   @unique @map("member_id") @db.Uuid
+  isOnline  Boolean  @default(false) @map("is_online")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz
+
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@map("member_presence")
 }
 
 model Conversation {

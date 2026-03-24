@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import SearchPalette from "@/components/SearchPalette";
 
 const navigation = [
   { name: "Messagerie", href: "/messagerie", icon: MessageSquare },
@@ -211,6 +212,7 @@ export default function DashboardLayout({
           </div>
         </div>
       )}
+      <SearchPalette />
     </div>
   );
 }
