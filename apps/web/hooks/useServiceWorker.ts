@@ -37,7 +37,7 @@ export async function subscribeToPushNotifications(
   try {
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
     });
     return subscription;
   } catch (error) {
