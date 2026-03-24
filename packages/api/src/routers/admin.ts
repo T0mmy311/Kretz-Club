@@ -111,11 +111,11 @@ export const adminRouter = router({
       newMembers7d,
       messages30d,
       messages7d,
-      activeMembers7d: activeMembers7d.length,
-      topChannels: topChannels.map((c) => ({
+      activeMembers7d: (activeMembers7d as any[]).length,
+      topChannels: topChannels.map((c: any) => ({
         id: c.id,
         name: c.displayName,
-        messageCount: c._count.messages,
+        messageCount: c._count?.messages ?? 0,
       })),
     };
   }),
