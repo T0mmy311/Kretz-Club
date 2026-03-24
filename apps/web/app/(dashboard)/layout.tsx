@@ -17,6 +17,8 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import SearchPalette from "@/components/SearchPalette";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
 
 const navigation = [
   { name: "Messagerie", href: "/messagerie", icon: MessageSquare },
@@ -45,6 +47,7 @@ export default function DashboardLayout({
   const supabase = createClient();
   const [user, setUser] = useState<{ email?: string; name?: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useServiceWorker();
 
   useEffect(() => {
     const getUser = async () => {
@@ -140,7 +143,10 @@ export default function DashboardLayout({
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto bg-background pb-16 lg:pb-0">{children}</main>
+      <main className="flex-1 overflow-auto bg-background pb-16 lg:pb-0">
+        <PWAInstallPrompt />
+        {children}
+      </main>
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-white/[0.06] bg-[hsl(0,0%,4%)]/95 backdrop-blur-xl safe-area-bottom">

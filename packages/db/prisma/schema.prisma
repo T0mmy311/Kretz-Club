@@ -47,6 +47,10 @@ model Member {
   mentionedIn             MessageMention[]
   channelReadStatuses     ChannelReadStatus[]
   presence                MemberPresence?
+  sentInvitations         Invitation[]             @relation("InvitedBy")
+  usedInvitation          Invitation[]             @relation("UsedBy")
+  polls                   Poll[]
+  pollVotes               PollVote[]
 
   @@map("members")
 }
@@ -77,6 +81,7 @@ model Channel {
   messages     Message[]
   members      ChannelMember[]
   readStatuses ChannelReadStatus[]
+  polls        Poll[]
 
   @@map("channels")
 }
@@ -99,6 +104,7 @@ model Message {
   replies      Message[]         @relation("MessageThread")
   reactions    MessageReaction[]
   mentions     MessageMention[]
+  attachments  Attachment[]
 
   @@index([channelId, createdAt(sort: Desc)])
   @@index([conversationId, createdAt(sort: Desc)])
@@ -385,4 +391,87 @@ model Recommendation {
 
   @@unique([fromMemberId, toMemberId])
   @@map("recommendations")
+}
+
+// ============================================
+// INVITATIONS
+// ============================================
+
+model Invitation {
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique
+  email       String?
+  invitedById String    @map("invited_by_id") @db.Uuid
+  usedById    String?   @map("used_by_id") @db.Uuid
+  usedAt      DateTime? @map("used_at") @db.Timestamptz
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  invitedBy Member  @relation("InvitedBy", fields: [invitedById], references: [id])
+  usedBy    Member? @relation("UsedBy", fields: [usedById], references: [id])
+
+  @@map("invitations")
+}
+
+// ============================================
+// POLLS
+// ============================================
+
+model Poll {
+  id          String    @id @default(uuid()) @db.Uuid
+  channelId   String    @map("channel_id") @db.Uuid
+  authorId    String    @map("author_id") @db.Uuid
+  question    String
+  isAnonymous Boolean   @default(false) @map("is_anonymous")
+  isMultiple  Boolean   @default(false) @map("is_multiple")
+  endsAt      DateTime? @map("ends_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  channel Channel      @relation(fields: [channelId], references: [id])
+  author  Member       @relation(fields: [authorId], references: [id])
+  options PollOption[]
+
+  @@map("polls")
+}
+
+model PollOption {
+  id     String @id @default(uuid()) @db.Uuid
+  pollId String @map("poll_id") @db.Uuid
+  text   String
+
+  poll  Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes PollVote[]
+
+  @@map("poll_options")
+}
+
+model PollVote {
+  id        String   @id @default(uuid()) @db.Uuid
+  optionId  String   @map("option_id") @db.Uuid
+  memberId  String   @map("member_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  option PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  member Member     @relation(fields: [memberId], references: [id])
+
+  @@unique([optionId, memberId])
+  @@map("poll_votes")
+}
+
+// ============================================
+// ATTACHMENTS
+// ============================================
+
+model Attachment {
+  id          String   @id @default(uuid()) @db.Uuid
+  messageId   String   @map("message_id") @db.Uuid
+  fileName    String   @map("file_name")
+  fileType    String   @map("file_type")
+  fileSize    Int      @map("file_size")
+  storagePath String   @map("storage_path")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("attachments")
 }

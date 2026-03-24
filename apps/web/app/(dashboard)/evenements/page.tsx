@@ -121,7 +121,7 @@ export default function EvenementsPage() {
                   </button>
                   <button
                     onClick={async () => {
-                      const res = await fetch(`/api/events/${event.id}/ics`);
+                      const res = await fetch(`/api/event/${event.id}/ics`);
                       if (res.ok) {
                         const blob = await res.blob();
                         const url = URL.createObjectURL(blob);

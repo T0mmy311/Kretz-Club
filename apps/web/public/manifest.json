@@ -1,0 +1,21 @@
+{
+  "name": "Kretz Club",
+  "short_name": "Kretz",
+  "description": "Club priv\u00e9 d\u2019investissement immobilier",
+  "start_url": "/messagerie",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [
+    {
+      "src": "/logo-kretz-club.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/logo-kretz-club.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

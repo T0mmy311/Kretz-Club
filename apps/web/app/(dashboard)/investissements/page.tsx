@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp, MapPin, ExternalLink, Users, Loader2 } from "lucide-react";
+import { TrendingUp, MapPin, ExternalLink, Users, Loader2, BarChart3 } from "lucide-react";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -54,11 +55,20 @@ export default function InvestissementsPage() {
 
   return (
     <div className="p-4 lg:p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold">Investissements</h2>
-        <p className="mt-1 text-muted-foreground">
-          {"D\u00e9couvrez les opportunit\u00e9s d\u2019investissement du Kretz Club"}
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Investissements</h2>
+          <p className="mt-1 text-[13px] text-white/40">
+            {"D\u00e9couvrez les opportunit\u00e9s d\u2019investissement du Kretz Club"}
+          </p>
+        </div>
+        <Link
+          href="/investissements/portfolio"
+          className="flex items-center gap-2 rounded-md bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/60 hover:bg-white/[0.1] transition-colors"
+        >
+          <BarChart3 className="h-4 w-4" />
+          Mon portfolio
+        </Link>
       </div>
 
       {/* Tabs */}

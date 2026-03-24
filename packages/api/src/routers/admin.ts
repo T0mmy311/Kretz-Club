@@ -72,4 +72,51 @@ export const adminRouter = router({
 
       return updated;
     }),
+
+  analytics: adminProcedure.query(async () => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      newMembers30d,
+      newMembers7d,
+      messages30d,
+      messages7d,
+      activeMembers7d,
+      topChannels,
+    ] = await Promise.all([
+      prisma.member.count({ where: { joinedAt: { gte: thirtyDaysAgo } } }),
+      prisma.member.count({ where: { joinedAt: { gte: sevenDaysAgo } } }),
+      prisma.message.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+      prisma.message.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      prisma.message.findMany({
+        where: { createdAt: { gte: sevenDaysAgo } },
+        select: { authorId: true },
+        distinct: ["authorId"],
+      }),
+      prisma.channel.findMany({
+        select: {
+          id: true,
+          displayName: true,
+          _count: { select: { messages: true } },
+        },
+        orderBy: { messages: { _count: "desc" } },
+        take: 5,
+      }),
+    ]);
+
+    return {
+      newMembers30d,
+      newMembers7d,
+      messages30d,
+      messages7d,
+      activeMembers7d: activeMembers7d.length,
+      topChannels: topChannels.map((c) => ({
+        id: c.id,
+        name: c.displayName,
+        messageCount: c._count.messages,
+      })),
+    };
+  }),
 });

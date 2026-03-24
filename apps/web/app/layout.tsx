@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Kretz Club",
   },
+  icons: {
+    apple: "/logo-kretz-club.svg",
+  },
 };
 
 export const viewport: Viewport = {
@@ -22,7 +25,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0a0b0f",
+  themeColor: "#080808",
 };
 
 export default function RootLayout({
