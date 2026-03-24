@@ -51,6 +51,7 @@ model Member {
   usedInvitation          Invitation[]             @relation("UsedBy")
   polls                   Poll[]
   pollVotes               PollVote[]
+  pinnedMessages          Message[]              @relation("PinnedMessages")
 
   @@map("members")
 }
@@ -94,12 +95,16 @@ model Message {
   content        String
   parentId       String?       @map("parent_id") @db.Uuid
   isEdited       Boolean       @default(false) @map("is_edited")
+  isPinned       Boolean       @default(false) @map("is_pinned")
+  pinnedAt       DateTime?     @map("pinned_at") @db.Timestamptz
+  pinnedById     String?       @map("pinned_by_id") @db.Uuid
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   channel      Channel?      @relation(fields: [channelId], references: [id])
   conversation Conversation? @relation(fields: [conversationId], references: [id])
   author       Member        @relation(fields: [authorId], references: [id])
+  pinnedBy     Member?       @relation("PinnedMessages", fields: [pinnedById], references: [id])
   parent       Message?          @relation("MessageThread", fields: [parentId], references: [id])
   replies      Message[]         @relation("MessageThread")
   reactions    MessageReaction[]
@@ -153,10 +158,12 @@ model ChannelReadStatus {
 }
 
 model MemberPresence {
-  id        String   @id @default(uuid()) @db.Uuid
-  memberId  String   @unique @map("member_id") @db.Uuid
-  isOnline  Boolean  @default(false) @map("is_online")
-  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz
+  id          String   @id @default(uuid()) @db.Uuid
+  memberId    String   @unique @map("member_id") @db.Uuid
+  isOnline    Boolean  @default(false) @map("is_online")
+  lastSeenAt  DateTime @default(now()) @map("last_seen_at") @db.Timestamptz
+  statusText  String?  @map("status_text")
+  statusEmoji String?  @map("status_emoji")
 
   member Member @relation(fields: [memberId], references: [id])
 

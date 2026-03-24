@@ -328,4 +328,114 @@ export const messageRouter = router({
 
       return { success: true };
     }),
+
+  /**
+   * Toggle pin on a message.
+   */
+  pin: protectedProcedure
+    .input(z.object({ messageId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { messageId } = input;
+      const memberId = ctx.member.id;
+
+      const existing = await prisma.message.findUnique({
+        where: { id: messageId },
+        select: { id: true, isPinned: true, channelId: true },
+      });
+
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Message introuvable" });
+      }
+
+      // Verify channel membership
+      if (existing.channelId) {
+        const membership = await prisma.channelMember.findUnique({
+          where: {
+            channelId_memberId: {
+              channelId: existing.channelId,
+              memberId,
+            },
+          },
+        });
+
+        if (!membership) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Vous n'êtes pas membre de ce channel",
+          });
+        }
+      }
+
+      const updated = await prisma.message.update({
+        where: { id: messageId },
+        data: existing.isPinned
+          ? { isPinned: false, pinnedAt: null, pinnedById: null }
+          : { isPinned: true, pinnedAt: new Date(), pinnedById: memberId },
+        select: {
+          id: true,
+          isPinned: true,
+          pinnedAt: true,
+          pinnedById: true,
+        },
+      });
+
+      return updated;
+    }),
+
+  /**
+   * Get all pinned messages for a channel.
+   */
+  getPinned: protectedProcedure
+    .input(z.object({ channelId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const { channelId } = input;
+      const memberId = ctx.member.id;
+
+      // Verify channel membership
+      const membership = await prisma.channelMember.findUnique({
+        where: {
+          channelId_memberId: { channelId, memberId },
+        },
+      });
+
+      if (!membership) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Vous n'êtes pas membre de ce channel",
+        });
+      }
+
+      const pinned = await prisma.message.findMany({
+        where: {
+          channelId,
+          isPinned: true,
+        },
+        orderBy: { pinnedAt: "desc" },
+        select: {
+          id: true,
+          content: true,
+          channelId: true,
+          isPinned: true,
+          pinnedAt: true,
+          createdAt: true,
+          author: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+          pinnedBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
+
+      return pinned;
+    }),
 });

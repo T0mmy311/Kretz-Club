@@ -63,7 +63,7 @@ export default function InscriptionPage() {
       });
     }
 
-    router.push("/messagerie");
+    router.push("/onboarding");
     router.refresh();
   };
 

@@ -18,7 +18,9 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import SearchPalette from "@/components/SearchPalette";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
+import { useUnreadCounts } from "@/hooks/useUnreadCounts";
 
 const navigation = [
   { name: "Messagerie", href: "/messagerie", icon: MessageSquare },
@@ -48,6 +50,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<{ email?: string; name?: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useServiceWorker();
+  const { messagerieUnread } = useUnreadCounts();
 
   useEffect(() => {
     const getUser = async () => {
@@ -91,12 +94,13 @@ export default function DashboardLayout({
           <div className="space-y-0.5">
             {navigation.map((item) => {
               const isActive = pathname.startsWith(item.href);
+              const badge = item.href === "/messagerie" && messagerieUnread > 0 ? messagerieUnread : 0;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
+                    "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
                     isActive
                       ? "bg-white/[0.08] text-white"
                       : "text-white/40 hover:bg-white/[0.04] hover:text-white/70"
@@ -104,6 +108,11 @@ export default function DashboardLayout({
                 >
                   <item.icon className={cn("h-[18px] w-[18px]", isActive ? "text-white/80" : "text-white/30")} />
                   {item.name}
+                  {badge > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                      {badge > 99 ? "99+" : badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -121,13 +130,16 @@ export default function DashboardLayout({
               <p className="truncate text-[11px] text-white/30">{user?.email}</p>
             </div>
           </Link>
-          <button
-            onClick={handleSignOut}
-            className="mt-0.5 flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] text-white/30 hover:bg-white/[0.04] hover:text-white/50 transition-colors"
-          >
-            <LogOut className="h-[16px] w-[16px]" />
-            {"Se d\u00e9connecter"}
-          </button>
+          <div className="mt-0.5 flex items-center gap-1">
+            <button
+              onClick={handleSignOut}
+              className="flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-[13px] text-white/30 hover:bg-white/[0.04] hover:text-white/50 transition-colors"
+            >
+              <LogOut className="h-[16px] w-[16px]" />
+              {"Se d\u00e9connecter"}
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 
@@ -137,9 +149,12 @@ export default function DashboardLayout({
           <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-6 w-6 opacity-90" />
           <span className="text-[15px] font-semibold text-white/90">Kretz Club</span>
         </div>
-        <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70">
-          {getInitials(user?.name)}
-        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70">
+            {getInitials(user?.name)}
+          </Link>
+        </div>
       </header>
 
       {/* Main content */}
@@ -167,16 +182,22 @@ export default function DashboardLayout({
             );
           }
           const isActive = pathname.startsWith(item.href);
+          const badge = item.href === "/messagerie" && messagerieUnread > 0 ? messagerieUnread : 0;
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors",
+                "relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors",
                 isActive ? "text-white" : "text-white/30"
               )}
             >
               <item.icon className="h-5 w-5" />
+              {badge > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
               <span>{item.name}</span>
             </Link>
           );

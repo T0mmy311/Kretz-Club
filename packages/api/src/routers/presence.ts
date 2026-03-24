@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { prisma } from "@kretz/db";
 import { router, protectedProcedure } from "../trpc";
 
@@ -42,6 +43,8 @@ export const presenceRouter = router({
       select: {
         memberId: true,
         lastSeenAt: true,
+        statusText: true,
+        statusEmoji: true,
         member: {
           select: {
             id: true,
@@ -54,5 +57,53 @@ export const presenceRouter = router({
     });
 
     return online;
+  }),
+
+  /**
+   * Set a custom status (text + emoji) for the current member.
+   */
+  setStatus: protectedProcedure
+    .input(
+      z.object({
+        statusText: z.string().max(100).optional(),
+        statusEmoji: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const memberId = ctx.member.id;
+
+      const presence = await prisma.memberPresence.upsert({
+        where: { memberId },
+        create: {
+          memberId,
+          isOnline: true,
+          lastSeenAt: new Date(),
+          statusText: input.statusText ?? null,
+          statusEmoji: input.statusEmoji ?? null,
+        },
+        update: {
+          statusText: input.statusText ?? null,
+          statusEmoji: input.statusEmoji ?? null,
+        },
+      });
+
+      return presence;
+    }),
+
+  /**
+   * Clear the custom status for the current member.
+   */
+  clearStatus: protectedProcedure.mutation(async ({ ctx }) => {
+    const memberId = ctx.member.id;
+
+    const presence = await prisma.memberPresence.update({
+      where: { memberId },
+      data: {
+        statusText: null,
+        statusEmoji: null,
+      },
+    });
+
+    return presence;
   }),
 });
