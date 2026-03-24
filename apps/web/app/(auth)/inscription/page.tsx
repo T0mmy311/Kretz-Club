@@ -35,7 +35,16 @@ export default function InscriptionPage() {
     });
 
     if (signUpError) {
-      setError(signUpError.message);
+      const msg = signUpError.message.toLowerCase();
+      if (msg.includes("already registered") || msg.includes("already been registered")) {
+        setError("Cet email est d\u00e9j\u00e0 utilis\u00e9. Connectez-vous plut\u00f4t.");
+      } else if (msg.includes("rate limit")) {
+        setError("Trop de tentatives. Veuillez r\u00e9essayer dans quelques minutes.");
+      } else if (msg.includes("invalid")) {
+        setError("Adresse email invalide.");
+      } else {
+        setError(signUpError.message);
+      }
       setLoading(false);
       return;
     }

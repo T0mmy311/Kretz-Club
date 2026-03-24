@@ -63,7 +63,7 @@ export default function ProfilPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         <div className="h-8 w-48 animate-pulse rounded bg-muted" />
         <div className="mt-6 space-y-4">
           {[...Array(6)].map((_, i) => (
@@ -75,7 +75,7 @@ export default function ProfilPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 lg:p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold">Mon profil</h2>
         <p className="mt-1 text-muted-foreground">

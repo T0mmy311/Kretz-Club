@@ -131,7 +131,7 @@ export default function ChannelPage({
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 border-b px-4 py-3">
-        <Link href="/messagerie" className="rounded-md p-1 hover:bg-muted lg:hidden">
+        <Link href="/messagerie" className="rounded-md p-1 hover:bg-accent">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <Hash className="h-5 w-5 text-muted-foreground" />

@@ -11,8 +11,9 @@ import {
   Image,
   FileText,
   LogOut,
-  User,
   Crown,
+  Menu,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,15 @@ const navigation = [
   { name: "Factures", href: "/factures", icon: FileText },
 ];
 
+// Bottom nav shows only the 5 most important items on mobile
+const mobileNav = [
+  { name: "Messages", href: "/messagerie", icon: MessageSquare },
+  { name: "Deals", href: "/investissements", icon: TrendingUp },
+  { name: "Events", href: "/evenements", icon: Calendar },
+  { name: "Annuaire", href: "/annuaire", icon: Users },
+  { name: "Plus", href: "", icon: Menu },
+];
+
 export default function DashboardLayout({
   children,
 }: {
@@ -35,6 +45,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const supabase = createClient();
   const [user, setUser] = useState<{ email?: string; name?: string } | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -49,6 +60,11 @@ export default function DashboardLayout({
     getUser();
   }, [supabase]);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/connexion");
@@ -60,17 +76,15 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <aside className="flex w-64 flex-col border-r border-border/50 bg-card">
+    <div className="flex h-screen flex-col lg:flex-row">
+      {/* Desktop Sidebar - hidden on mobile */}
+      <aside className="hidden lg:flex w-64 flex-col border-r border-border/50 bg-card">
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-border/50 px-6">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-gold">
             <Crown className="h-4 w-4 text-black" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-gradient-gold">
-            Kretz Club
-          </h1>
+          <h1 className="text-xl font-bold tracking-tight text-gradient-gold">Kretz Club</h1>
         </div>
 
         {/* Navigation */}
@@ -97,10 +111,7 @@ export default function DashboardLayout({
 
         {/* User section */}
         <div className="border-t border-border/50 p-3">
-          <Link
-            href="/profil"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-accent transition-colors"
-          >
+          <Link href="/profil" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-accent transition-colors">
             <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-gold text-xs font-bold text-black">
               {getInitials(user?.name)}
             </div>
@@ -119,8 +130,92 @@ export default function DashboardLayout({
         </div>
       </aside>
 
+      {/* Mobile Header */}
+      <header className="flex lg:hidden items-center justify-between border-b border-border/50 bg-card px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg gradient-gold">
+            <Crown className="h-3.5 w-3.5 text-black" />
+          </div>
+          <h1 className="text-lg font-bold text-gradient-gold">Kretz Club</h1>
+        </div>
+        <Link href="/profil" className="flex h-8 w-8 items-center justify-center rounded-full gradient-gold text-xs font-bold text-black">
+          {getInitials(user?.name)}
+        </Link>
+      </header>
+
       {/* Main content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto pb-16 lg:pb-0">{children}</main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg safe-area-bottom">
+        {mobileNav.map((item) => {
+          if (item.name === "Plus") {
+            return (
+              <button
+                key="plus"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
+                  mobileMenuOpen ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                <span>Plus</span>
+              </button>
+            );
+          }
+          const isActive = pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
+                isActive ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Mobile "Plus" menu overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute bottom-16 left-0 right-0 rounded-t-2xl border-t border-border/50 bg-card p-4 safe-area-bottom">
+            <div className="mb-4 grid grid-cols-3 gap-3">
+              {[
+                { name: "Galerie", href: "/galerie", icon: Image },
+                { name: "Factures", href: "/factures", icon: FileText },
+                { name: "Profil", href: "/profil", icon: Users },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-xl border border-border/50 p-4 text-sm transition-colors hover:bg-accent",
+                    pathname.startsWith(item.href) && "border-primary/50 bg-primary/5 text-primary"
+                  )}
+                >
+                  <item.icon className="h-6 w-6" />
+                  <span className="text-xs font-medium">{item.name}</span>
+                </Link>
+              ))}
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-destructive/30 py-3 text-sm font-medium text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4" />
+              {"Se d\u00e9connecter"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

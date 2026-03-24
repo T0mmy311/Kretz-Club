@@ -57,8 +57,8 @@ export default function MessageriePage() {
 
   return (
     <div className="flex h-full">
-      {/* Sidebar */}
-      <div className="flex w-80 flex-col border-r bg-muted/30">
+      {/* Sidebar - full width on mobile, fixed width on desktop */}
+      <div className="flex w-full lg:w-80 flex-col border-r border-border/50">
         <div className="border-b p-4">
           <h2 className="text-lg font-semibold">Messagerie</h2>
         </div>
@@ -244,8 +244,8 @@ export default function MessageriePage() {
         </div>
       </div>
 
-      {/* Message area placeholder */}
-      <div className="flex flex-1 items-center justify-center">
+      {/* Message area placeholder - hidden on mobile */}
+      <div className="hidden lg:flex flex-1 items-center justify-center">
         <div className="text-center text-muted-foreground">
           <MessageSquare className="mx-auto h-12 w-12 opacity-20" />
           <p className="mt-4 text-lg font-medium">

@@ -52,7 +52,7 @@ export default function InvestissementsPage() {
     : investments.filter((i: any) => i.status === activeTab);
 
   return (
-    <div className="p-6">
+    <div className="p-4 lg:p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold">Investissements</h2>
         <p className="mt-1 text-muted-foreground">
@@ -61,7 +61,7 @@ export default function InvestissementsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
+      <div className="mb-6 flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
         {tabs.map((tab) => (
           <button
             key={tab.value}

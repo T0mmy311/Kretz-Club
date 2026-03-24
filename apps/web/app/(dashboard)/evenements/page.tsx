@@ -29,7 +29,7 @@ export default function EvenementsPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 lg:p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold">Evenements</h2>
         <p className="mt-1 text-muted-foreground">

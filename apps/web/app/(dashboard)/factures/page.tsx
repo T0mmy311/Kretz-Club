@@ -16,7 +16,7 @@ export default function FacturesPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 lg:p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold">Factures</h2>
         <p className="mt-1 text-muted-foreground">
@@ -34,7 +34,7 @@ export default function FacturesPage() {
           ))}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-x-auto rounded-xl border">
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/50">
