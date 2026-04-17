@@ -14,7 +14,7 @@ export const eventRouter = router({
         limit: z.number().int().min(1).max(100).default(20),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const { status, cursor, limit } = input;
       const now = new Date();
 
@@ -33,6 +33,10 @@ export const eventRouter = router({
           : { startsAt: "asc" },
         include: {
           _count: { select: { registrations: true } },
+          registrations: {
+            where: { memberId: ctx.member.id },
+            select: { id: true },
+          },
         },
       });
 

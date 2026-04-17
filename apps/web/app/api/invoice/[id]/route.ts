@@ -118,8 +118,8 @@ function generateInvoiceHTML(invoice: any) {
     <div class="invoice-info">
       <div class="invoice-number">${invoice.invoiceNumber}</div>
       <div class="invoice-date">${date}</div>
-      <div class="status ${invoice.status === 'paid' ? 'status-paid' : 'status-pending'}">
-        ${invoice.status === 'paid' ? 'Pay\u00e9e' : 'En attente'}
+      <div class="status ${invoice.paidAt ? 'status-paid' : 'status-pending'}">
+        ${invoice.paidAt ? 'Pay\u00e9e' : 'En attente'}
       </div>
     </div>
   </div>

@@ -23,8 +23,8 @@ export default function FacturesPage() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    if (status === "paid") {
+  const getStatusBadge = (paidAt: string | null | undefined) => {
+    if (paidAt) {
       return (
         <span className="inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-[11px] font-medium text-green-400">
           {"Pay\u00e9e"}
@@ -97,7 +97,7 @@ export default function FacturesPage() {
                       {invoice.description ?? invoice.event?.title ?? "-"}
                     </td>
                     <td className="px-4 py-3">
-                      {getStatusBadge(invoice.status)}
+                      {getStatusBadge(invoice.paidAt)}
                     </td>
                     <td className="px-4 py-3 text-right text-[13px] font-medium text-white/80">
                       {formatAmount(invoice.totalAmount)}
@@ -125,7 +125,7 @@ export default function FacturesPage() {
               <div key={invoice.id} className="rounded-lg border border-white/[0.06] p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[13px] font-medium text-white/80">{invoice.invoiceNumber}</span>
-                  {getStatusBadge(invoice.status)}
+                  {getStatusBadge(invoice.paidAt)}
                 </div>
                 <p className="text-[13px] text-white/50">{invoice.description ?? invoice.event?.title ?? "-"}</p>
                 <div className="flex items-center justify-between">

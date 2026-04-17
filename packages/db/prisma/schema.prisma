@@ -53,6 +53,7 @@ model Member {
   pollVotes               PollVote[]
   pinnedMessages          Message[]              @relation("PinnedMessages")
 
+  @@index([isActive])
   @@map("members")
 }
 
@@ -189,6 +190,7 @@ model ConversationParticipant {
   member       Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@id([conversationId, memberId])
+  @@index([memberId])
   @@map("conversation_participants")
 }
 
@@ -201,6 +203,7 @@ model ChannelMember {
   member  Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@id([channelId, memberId])
+  @@index([memberId])
   @@map("channel_members")
 }
 
@@ -265,6 +268,7 @@ model MemberInvestment {
   member     Member     @relation(fields: [memberId], references: [id])
 
   @@unique([investmentId, memberId])
+  @@index([memberId])
   @@map("member_investments")
 }
 
@@ -318,6 +322,7 @@ model EventRegistration {
   member Member @relation(fields: [memberId], references: [id])
 
   @@unique([eventId, memberId])
+  @@index([memberId])
   @@map("event_registrations")
 }
 
@@ -378,6 +383,7 @@ model Invoice {
   member Member @relation(fields: [memberId], references: [id])
   event  Event? @relation(fields: [eventId], references: [id])
 
+  @@index([memberId])
   @@map("invoices")
 }
 

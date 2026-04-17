@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, MapPin, Euro, CalendarPlus } from "lucide-react";
+import { Calendar, MapPin, Euro, CalendarPlus, Loader2, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -12,10 +12,22 @@ const tabs = [
 
 export default function EvenementsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const utils = trpc.useUtils();
   const { data, isLoading } = trpc.event.list.useQuery({
     status: activeTab as "upcoming" | "past",
   });
   const events = data?.items ?? [];
+
+  const register = trpc.event.register.useMutation({
+    onSuccess: () => {
+      setErrorMsg(null);
+      utils.event.list.invalidate();
+    },
+    onError: (err) => {
+      setErrorMsg(err.message);
+    },
+  });
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("fr-FR", {
@@ -54,6 +66,13 @@ export default function EvenementsPage() {
           </button>
         ))}
       </div>
+
+      {/* Error message */}
+      {errorMsg && (
+        <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600">
+          {errorMsg}
+        </div>
+      )}
 
       {/* Grid */}
       {isLoading ? (
@@ -116,9 +135,33 @@ export default function EvenementsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  <button className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                    {"S\u2019inscrire"}
-                  </button>
+                  {event.registrations && event.registrations.length > 0 ? (
+                    <button
+                      disabled
+                      className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-600/20 px-4 py-2 text-sm font-medium text-green-600 cursor-default"
+                    >
+                      <Check className="h-4 w-4" />
+                      {"Inscrit \u2713"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setErrorMsg(null);
+                        register.mutate({ eventId: event.id });
+                      }}
+                      disabled={register.isPending}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      {register.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Inscription...
+                        </>
+                      ) : (
+                        "S\u2019inscrire"
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={async () => {
                       const res = await fetch(`/api/event/${event.id}/ics`);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@kretz/db";
 import { router, protectedProcedure } from "../trpc";
 
@@ -40,38 +41,59 @@ export const readStatusRouter = router({
   getUnreadCounts: protectedProcedure.query(async ({ ctx }) => {
     const memberId = ctx.member.id;
 
-    // Get all channels the member belongs to
-    const memberships = await prisma.channelMember.findMany({
-      where: { memberId },
-      select: { channelId: true },
-    });
+    // Get all channels the member belongs to, with their read statuses
+    const [memberships, readStatuses] = await Promise.all([
+      prisma.channelMember.findMany({
+        where: { memberId },
+        select: { channelId: true },
+      }),
+      prisma.channelReadStatus.findMany({
+        where: { memberId },
+        select: { channelId: true, lastReadAt: true },
+      }),
+    ]);
 
-    // Get all read statuses for this member
-    const readStatuses = await prisma.channelReadStatus.findMany({
-      where: { memberId },
-      select: { channelId: true, lastReadAt: true },
-    });
+    if (memberships.length === 0) return [];
 
     const readStatusMap = new Map(
       readStatuses.map((rs) => [rs.channelId, rs.lastReadAt])
     );
 
-    // Count unread messages for each channel
-    const counts = await Promise.all(
-      memberships.map(async ({ channelId }) => {
-        const lastReadAt = readStatusMap.get(channelId);
+    // Build per-channel read dates for the raw query
+    const channelReadDates = memberships.map(({ channelId }) => ({
+      channelId,
+      lastReadAt: readStatusMap.get(channelId) ?? new Date(0),
+    }));
 
-        const unreadCount = await prisma.message.count({
-          where: {
-            channelId,
-            ...(lastReadAt ? { createdAt: { gt: lastReadAt } } : {}),
-          },
-        });
-
-        return { channelId, unreadCount };
-      })
+    // Count unread messages for all channels in a single SQL query
+    const unreadCounts = await prisma.$queryRaw<
+      { channel_id: string; unread: bigint }[]
+    >(
+      Prisma.sql`
+        SELECT m.channel_id, COUNT(*)::bigint AS unread
+        FROM messages m
+        INNER JOIN (
+          VALUES ${Prisma.join(
+            channelReadDates.map(
+              (cd) =>
+                Prisma.sql`(${cd.channelId}::uuid, ${cd.lastReadAt}::timestamptz)`
+            )
+          )}
+        ) AS cr(channel_id, last_read_at)
+          ON m.channel_id = cr.channel_id
+          AND m.created_at > cr.last_read_at
+        GROUP BY m.channel_id
+      `
     );
 
-    return counts;
+    const unreadMap = new Map(
+      unreadCounts.map((u) => [u.channel_id, Number(u.unread)])
+    );
+
+    // Return counts for all member channels (0 if no unread)
+    return memberships.map(({ channelId }) => ({
+      channelId,
+      unreadCount: unreadMap.get(channelId) ?? 0,
+    }));
   }),
 });

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@kretz/db";
 import { router, protectedProcedure } from "../trpc";
 
@@ -38,26 +39,36 @@ export const channelRouter = router({
       memberships.map((m) => [m.channelId, m])
     );
 
-    // Count unread messages per channel
-    const unreadCounts = await Promise.all(
-      channels.map(async (channel) => {
-        const membership = membershipMap.get(channel.id);
-        if (!membership) return { channelId: channel.id, unread: 0 };
+    // Count unread messages per channel in a single SQL query
+    // Each channel has its own lastReadAt, so we use a raw query with
+    // a VALUES join to handle per-channel date filtering efficiently.
+    let unreadMap = new Map<string, number>();
 
-        const unread = await prisma.message.count({
-          where: {
-            channelId: channel.id,
-            createdAt: membership.lastReadAt
-              ? { gt: membership.lastReadAt }
-              : undefined,
-          },
-        });
+    if (memberships.length > 0) {
+      const unreadCounts = await prisma.$queryRaw<
+        { channel_id: string; unread: bigint }[]
+      >(
+        Prisma.sql`
+          SELECT m.channel_id, COUNT(*)::bigint AS unread
+          FROM messages m
+          INNER JOIN (
+            VALUES ${Prisma.join(
+              memberships.map(
+                (ms) =>
+                  Prisma.sql`(${ms.channelId}::uuid, ${ms.lastReadAt ?? new Date(0)}::timestamptz)`
+              )
+            )}
+          ) AS cm(channel_id, last_read_at)
+            ON m.channel_id = cm.channel_id
+            AND m.created_at > cm.last_read_at
+          GROUP BY m.channel_id
+        `
+      );
 
-        return { channelId: channel.id, unread };
-      })
-    );
-
-    const unreadMap = new Map(unreadCounts.map((u) => [u.channelId, u.unread]));
+      unreadMap = new Map(
+        unreadCounts.map((u) => [u.channel_id, Number(u.unread)])
+      );
+    }
 
     // Group channels by category
     const grouped = channels.reduce<

@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@kretz/db";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const { id } = await params;
 
     const event = await prisma.event.findUnique({

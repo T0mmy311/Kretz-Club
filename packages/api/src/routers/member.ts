@@ -126,23 +126,26 @@ export const memberRouter = router({
     .query(async ({ input }) => {
       const { cursor, limit } = input;
 
-      const members = await prisma.member.findMany({
-        where: { isActive: true },
-        take: limit + 1,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-        orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          avatarUrl: true,
-          profession: true,
-          company: true,
-          bio: true,
-          city: true,
-          joinedAt: true,
-        },
-      });
+      const [members, totalCount] = await Promise.all([
+        prisma.member.findMany({
+          where: { isActive: true },
+          take: limit + 1,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+          orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            profession: true,
+            company: true,
+            bio: true,
+            city: true,
+            joinedAt: true,
+          },
+        }),
+        prisma.member.count({ where: { isActive: true } }),
+      ]);
 
       let nextCursor: string | undefined;
       if (members.length > limit) {
@@ -150,6 +153,6 @@ export const memberRouter = router({
         nextCursor = next!.id;
       }
 
-      return { items: members, nextCursor };
+      return { items: members, nextCursor, totalCount };
     }),
 });

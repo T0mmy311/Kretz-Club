@@ -28,6 +28,9 @@ export const investmentRouter = router({
           createdBy: {
             select: { id: true, firstName: true, lastName: true, avatarUrl: true },
           },
+          memberInvestments: {
+            select: { id: true, memberId: true, amount: true, status: true, notes: true },
+          },
         },
       });
 

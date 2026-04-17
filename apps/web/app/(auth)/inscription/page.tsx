@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 export default function InscriptionPage() {
+  const [inviteCode, setInviteCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -22,6 +23,25 @@ export default function InscriptionPage() {
 
     if (password.length < 6) {
       setError("Le mot de passe doit contenir au moins 6 caractères");
+      setLoading(false);
+      return;
+    }
+
+    // Validate invitation code before signup
+    try {
+      const inviteRes = await fetch("/api/auth/validate-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: inviteCode }),
+      });
+      const inviteData = await inviteRes.json();
+      if (!inviteData.valid) {
+        setError("Code d'invitation invalide ou expiré");
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setError("Erreur lors de la vérification du code d'invitation");
       setLoading(false);
       return;
     }
@@ -61,6 +81,13 @@ export default function InscriptionPage() {
           lastName,
         }),
       });
+
+      // Mark invitation code as used
+      await fetch("/api/auth/use-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: inviteCode, memberId: data.user.id }),
+      });
     }
 
     router.push("/onboarding");
@@ -77,6 +104,24 @@ export default function InscriptionPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="inviteCode"
+            className="block text-sm font-medium text-foreground"
+          >
+            {"Code d'invitation"}
+          </label>
+          <input
+            id="inviteCode"
+            type="text"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            placeholder="Entrez votre code d'invitation"
+            required
+            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label

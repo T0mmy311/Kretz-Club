@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Building2, MessageSquare, MapPin, Briefcase, X, Pencil } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Search, Building2, MessageSquare, MapPin, Briefcase, X, Pencil, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
@@ -12,17 +12,44 @@ export default function AnnuairePage() {
   const [search, setSearch] = useState("");
   const [filterCity, setFilterCity] = useState("");
   const [filterProfession, setFilterProfession] = useState("");
+  const [extraMembers, setExtraMembers] = useState<any[]>([]);
+  const [latestCursor, setLatestCursor] = useState<string | undefined>(undefined);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const { data: meData } = trpc.member.me.useQuery();
   const currentMemberId = (meData as any)?.id;
 
-  const { data } = trpc.member.list.useQuery({});
+  const { data } = trpc.member.list.useQuery({ limit: 50 });
+
+  const utils = trpc.useUtils();
+
+  // Track the nextCursor: use latestCursor from manual loads, or fall back to initial data
+  const nextCursor = latestCursor !== undefined
+    ? latestCursor
+    : data?.nextCursor;
+
+  const loadMore = useCallback(async () => {
+    if (!nextCursor || isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = await utils.member.list.fetch({ limit: 50, cursor: nextCursor });
+      setExtraMembers((prev) => [...prev, ...nextPage.items]);
+      setLatestCursor(nextPage.nextCursor ?? "");
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [nextCursor, isLoadingMore, utils.member.list]);
+
   const { data: searchData, isLoading } = trpc.member.search.useQuery(
     { query: search },
     { enabled: search.length >= 2 }
   );
 
-  const allMembers = data?.items ?? [];
+  // Combine initial page with any extra loaded pages
+  const allMembers = [...(data?.items ?? []), ...extraMembers];
+  const totalCount = (data as any)?.totalCount ?? 0;
+  // When no latestCursor has been set yet, use data?.nextCursor to know if there are more
+  const hasMore = latestCursor !== undefined ? latestCursor !== "" : !!data?.nextCursor;
   let members = search.length >= 2 ? (searchData?.items ?? []) : allMembers;
 
   // Apply local filters
@@ -147,8 +174,9 @@ export default function AnnuairePage() {
 
         {/* Results count */}
         <p className="text-xs text-muted-foreground">
-          {members.length} membre{members.length > 1 ? "s" : ""}
-          {hasFilters ? " (filtr\u00e9s)" : ""}
+          {search.length >= 2 || hasFilters
+            ? `${members.length} membre${members.length > 1 ? "s" : ""}${hasFilters ? " (filtr\u00e9s)" : ""}`
+            : `Affichage de ${allMembers.length} sur ${totalCount} membres`}
         </p>
       </div>
 
@@ -214,6 +242,26 @@ export default function AnnuairePage() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Load more button */}
+      {hasMore && search.length < 2 && !hasFilters && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={loadMore}
+            disabled={isLoadingMore}
+            className="flex items-center gap-2 rounded-lg border border-border/50 bg-card px-6 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Chargement...
+              </>
+            ) : (
+              "Charger plus"
+            )}
+          </button>
         </div>
       )}
     </div>

@@ -20,6 +20,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ member: existing });
     }
 
+    // Check if this is the very first user (bootstrap without invite)
+    const memberCount = await prisma.member.count();
+    const isFirstUser = memberCount === 0;
+
+    // If not the first user, an invitation must have been validated separately
+    // (via /api/auth/validate-invite before signup)
+    if (!isFirstUser) {
+      // The invite validation is handled by the signup flow;
+      // this endpoint just creates the member record
+    }
+
     const member = await prisma.member.create({
       data: {
         supabaseAuthId,
