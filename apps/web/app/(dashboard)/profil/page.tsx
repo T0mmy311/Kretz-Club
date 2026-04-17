@@ -91,8 +91,8 @@ export default function ProfilPage() {
     return `${(form.firstName || "?")[0]}${(form.lastName || "")[0] || ""}`.toUpperCase();
   };
 
-  const inputClass = "mt-1.5 block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors";
-  const labelClass = "block text-[12px] font-medium text-white/50 uppercase tracking-wider";
+  const inputClass = "mt-1.5 block w-full rounded-md border border-border bg-muted/30 px-3 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground/40 focus:border-border/80 focus:outline-none focus:ring-0 transition-colors";
+  const labelClass = "block text-[12px] font-medium text-muted-foreground uppercase tracking-wider";
 
   if (isLoading) {
     return (
@@ -110,8 +110,8 @@ export default function ProfilPage() {
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-white">Mon profil</h2>
-        <p className="mt-1 text-[13px] text-white/40">
+        <h2 className="text-xl font-semibold text-foreground">Mon profil</h2>
+        <p className="mt-1 text-[13px] text-muted-foreground">
           {"Mettez \u00e0 jour vos informations personnelles"}
         </p>
       </div>
@@ -123,12 +123,12 @@ export default function ProfilPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-white/[0.08] transition-colors hover:bg-white/[0.12]"
+              className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted transition-colors hover:bg-accent"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                <span className="text-xl font-semibold text-white/50">{getInitials()}</span>
+                <span className="text-xl font-semibold text-muted-foreground">{getInitials()}</span>
               )}
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                 {uploading ? (
@@ -147,8 +147,8 @@ export default function ProfilPage() {
             />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-white/80">Photo de profil</p>
-            <p className="text-[12px] text-white/30">JPG, PNG ou WebP. Max 2MB.</p>
+            <p className="text-[14px] font-medium text-foreground/80">Photo de profil</p>
+            <p className="text-[12px] text-muted-foreground/60">JPG, PNG ou WebP. Max 2MB.</p>
           </div>
         </div>
 

@@ -20,10 +20,9 @@ export default function VerificationPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">Verifiez votre email</h1>
+        <h1 className="text-2xl font-bold">{"V\u00e9rifiez votre email"}</h1>
         <p className="mt-2 text-muted-foreground">
-          Un lien de connexion a ete envoye a votre adresse email. Cliquez
-          dessus pour acceder au Kretz Club.
+          {"Un lien de connexion a \u00e9t\u00e9 envoy\u00e9 \u00e0 votre adresse email. Cliquez dessus pour acc\u00e9der au Kretz Club."}
         </p>
       </div>
 
@@ -31,7 +30,7 @@ export default function VerificationPage() {
         href="/connexion"
         className="inline-block text-sm text-muted-foreground underline hover:text-foreground"
       >
-        Retour a la connexion
+        {"Retour \u00e0 la connexion"}
       </Link>
     </div>
   );

@@ -21,6 +21,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { useUnreadCounts } from "@/hooks/useUnreadCounts";
+import { trpc } from "@/lib/trpc/client";
 
 const navigation = [
   { name: "Messagerie", href: "/messagerie", icon: MessageSquare },
@@ -33,7 +34,7 @@ const navigation = [
 
 const mobileNav = [
   { name: "Messages", href: "/messagerie", icon: MessageSquare },
-  { name: "Deals", href: "/investissements", icon: TrendingUp },
+  { name: "Invest.", href: "/investissements", icon: TrendingUp },
   { name: "Events", href: "/evenements", icon: Calendar },
   { name: "Annuaire", href: "/annuaire", icon: Users },
   { name: "Plus", href: "", icon: Menu },
@@ -51,6 +52,11 @@ export default function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useServiceWorker();
   const { messagerieUnread } = useUnreadCounts();
+  const { data: meData } = trpc.member.me.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const memberAvatarUrl = (meData as any)?.avatarUrl as string | null | undefined;
 
   useEffect(() => {
     const getUser = async () => {
@@ -122,9 +128,13 @@ export default function DashboardLayout({
         {/* User */}
         <div className="border-t border-white/[0.06] p-3">
           <Link href="/profil" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-white/[0.04] transition-colors">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/70">
-              {getInitials(user?.name)}
-            </div>
+            {memberAvatarUrl ? (
+              <img src={memberAvatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/70">
+                {getInitials(user?.name)}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="truncate text-[13px] font-medium text-white/80">{user?.name || "..."}</p>
               <p className="truncate text-[11px] text-white/30">{user?.email}</p>
@@ -151,8 +161,12 @@ export default function DashboardLayout({
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70">
-            {getInitials(user?.name)}
+          <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70 overflow-hidden">
+            {memberAvatarUrl ? (
+              <img src={memberAvatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+            ) : (
+              getInitials(user?.name)
+            )}
           </Link>
         </div>
       </header>

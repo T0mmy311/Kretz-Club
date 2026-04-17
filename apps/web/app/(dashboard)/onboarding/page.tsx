@@ -71,10 +71,10 @@ export default function OnboardingPage() {
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === currentStep
-                  ? "w-8 bg-white"
+                  ? "w-8 bg-foreground"
                   : i < currentStep
-                  ? "w-1.5 bg-white/40"
-                  : "w-1.5 bg-white/10"
+                  ? "w-1.5 bg-foreground/40"
+                  : "w-1.5 bg-foreground/10"
               }`}
             />
           ))}
@@ -83,8 +83,8 @@ export default function OnboardingPage() {
         {/* Content */}
         <div className="text-center animate-fade-in" key={currentStep}>
           {step.icon && (
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.06]">
-              <step.icon className="h-8 w-8 text-white/60" />
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
+              <step.icon className="h-8 w-8 text-muted-foreground" />
             </div>
           )}
 
@@ -94,8 +94,8 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          <h2 className="text-2xl font-semibold text-white">{step.title}</h2>
-          <p className="mx-auto mt-4 max-w-sm text-[14px] leading-relaxed text-white/50">
+          <h2 className="text-2xl font-semibold text-foreground">{step.title}</h2>
+          <p className="mx-auto mt-4 max-w-sm text-[14px] leading-relaxed text-muted-foreground">
             {step.description}
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function OnboardingPage() {
         <div className="mt-10 flex flex-col items-center gap-3">
           <button
             onClick={handleNext}
-            className="flex w-full max-w-xs items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-[14px] font-semibold text-black hover:bg-white/90 transition-colors"
+            className="flex w-full max-w-xs items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-[14px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             {isLastStep ? (
               <>
@@ -122,7 +122,7 @@ export default function OnboardingPage() {
           {!isLastStep && (
             <button
               onClick={handleSkip}
-              className="text-[13px] text-white/30 hover:text-white/50 transition-colors"
+              className="text-[13px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
             >
               Passer le guide
             </button>

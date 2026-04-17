@@ -167,9 +167,13 @@ export default function MessageriePage() {
                           onClick={() => createConversation.mutate({ memberId: member.id })}
                           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
                         >
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                            {member.firstName[0]}{member.lastName[0]}
-                          </div>
+                          {member.avatarUrl ? (
+                            <img src={member.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+                          ) : (
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                              {member.firstName[0]}{member.lastName[0]}
+                            </div>
+                          )}
                           <div className="text-left">
                             <p className="font-medium">{member.firstName} {member.lastName}</p>
                             {member.profession && (
@@ -204,9 +208,13 @@ export default function MessageriePage() {
                           conv.hasUnread && "bg-accent/50"
                         )}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                          {other.firstName[0]}{other.lastName[0]}
-                        </div>
+                        {other.avatarUrl ? (
+                          <img src={other.avatarUrl} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+                            {other.firstName[0]}{other.lastName[0]}
+                          </div>
+                        )}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between">
                             <p className={cn("text-sm", conv.hasUnread ? "font-semibold" : "font-medium")}>

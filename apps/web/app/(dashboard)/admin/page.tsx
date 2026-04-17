@@ -48,7 +48,7 @@ export default function AdminPage() {
       icon: TrendingUp,
     },
     {
-      label: "Evenements",
+      label: "\u00c9v\u00e9nements",
       value: stats?.totalEvents ?? "-",
       icon: Calendar,
     },
@@ -66,10 +66,10 @@ export default function AdminPage() {
     <div className="p-4 lg:p-6">
       {/* Header */}
       <div className="mb-6 flex items-center gap-3">
-        <Shield className="h-6 w-6 text-white/50" />
+        <Shield className="h-6 w-6 text-muted-foreground" />
         <div>
-          <h2 className="text-2xl font-bold text-white/90">Administration</h2>
-          <p className="mt-0.5 text-sm text-white/40">
+          <h2 className="text-2xl font-bold text-foreground">Administration</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Tableau de bord administrateur
           </p>
         </div>
@@ -80,15 +80,15 @@ export default function AdminPage() {
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border border-white/[0.06] bg-[hsl(0,0%,6%)] p-5"
+            className="rounded-xl border border-border bg-card p-5"
           >
             <div className="flex items-center justify-between">
-              <stat.icon className="h-5 w-5 text-white/30" />
+              <stat.icon className="h-5 w-5 text-muted-foreground/60" />
             </div>
-            <p className="mt-3 text-2xl font-bold text-white/90">
+            <p className="mt-3 text-2xl font-bold text-foreground">
               {statsLoading ? "..." : stat.value}
             </p>
-            <p className="mt-0.5 text-xs text-white/40">{stat.label}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{stat.label}</p>
           </div>
         ))}
       </div>
@@ -96,20 +96,20 @@ export default function AdminPage() {
       {/* Recent Signups */}
       {recentSignups.length > 0 && (
         <div className="mb-8">
-          <h3 className="mb-3 text-lg font-semibold text-white/80">
-            Inscriptions recentes (30 jours)
+          <h3 className="mb-3 text-lg font-semibold text-foreground/80">
+            {"Inscriptions r\u00e9centes (30 jours)"}
           </h3>
-          <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                  <th className="px-4 py-3 text-left font-medium text-white/40">
+                <tr className="border-b border-border bg-card">
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                     Membre
                   </th>
-                  <th className="hidden px-4 py-3 text-left font-medium text-white/40 sm:table-cell">
+                  <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground sm:table-cell">
                     Email
                   </th>
-                  <th className="px-4 py-3 text-left font-medium text-white/40">
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                     Inscription
                   </th>
                 </tr>
@@ -118,15 +118,15 @@ export default function AdminPage() {
                 {recentSignups.map((member: any) => (
                   <tr
                     key={member.id}
-                    className="border-b border-white/[0.04] last:border-0"
+                    className="border-b border-border/50 last:border-0"
                   >
-                    <td className="px-4 py-3 text-white/80">
+                    <td className="px-4 py-3 text-foreground/80">
                       {member.firstName} {member.lastName}
                     </td>
-                    <td className="hidden px-4 py-3 text-white/50 sm:table-cell">
+                    <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
                       {member.email}
                     </td>
-                    <td className="px-4 py-3 text-white/50">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {formatDate(member.joinedAt)}
                     </td>
                   </tr>
@@ -139,29 +139,29 @@ export default function AdminPage() {
 
       {/* All Members */}
       <div>
-        <h3 className="mb-3 text-lg font-semibold text-white/80">
+        <h3 className="mb-3 text-lg font-semibold text-foreground/80">
           Tous les membres
         </h3>
-        <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                <th className="px-4 py-3 text-left font-medium text-white/40">
+              <tr className="border-b border-border bg-card">
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                   Membre
                 </th>
-                <th className="hidden px-4 py-3 text-left font-medium text-white/40 sm:table-cell">
+                <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground sm:table-cell">
                   Email
                 </th>
-                <th className="hidden px-4 py-3 text-left font-medium text-white/40 md:table-cell">
+                <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground md:table-cell">
                   Profession
                 </th>
-                <th className="hidden px-4 py-3 text-left font-medium text-white/40 lg:table-cell">
+                <th className="hidden px-4 py-3 text-left font-medium text-muted-foreground lg:table-cell">
                   Ville
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-white/40">
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                   Statut
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-white/40">
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                   Action
                 </th>
               </tr>
@@ -171,25 +171,25 @@ export default function AdminPage() {
                 ? [...Array(5)].map((_, i) => (
                     <tr
                       key={i}
-                      className="border-b border-white/[0.04]"
+                      className="border-b border-border/50"
                     >
                       <td colSpan={6} className="px-4 py-3">
-                        <div className="h-4 w-32 animate-pulse rounded bg-white/[0.06]" />
+                        <div className="h-4 w-32 animate-pulse rounded bg-muted/50" />
                       </td>
                     </tr>
                   ))
                 : members.map((member: any) => (
                     <tr
                       key={member.id}
-                      className="border-b border-white/[0.04] last:border-0"
+                      className="border-b border-border/50 last:border-0"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                             {(member.firstName?.[0] ?? "")}
                             {(member.lastName?.[0] ?? "")}
                           </div>
-                          <span className="text-white/80">
+                          <span className="text-foreground/80">
                             {member.firstName} {member.lastName}
                             {member.isAdmin && (
                               <span className="ml-1.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
@@ -199,13 +199,13 @@ export default function AdminPage() {
                           </span>
                         </div>
                       </td>
-                      <td className="hidden px-4 py-3 text-white/50 sm:table-cell">
+                      <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">
                         {member.email}
                       </td>
-                      <td className="hidden px-4 py-3 text-white/50 md:table-cell">
+                      <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">
                         {member.profession || "-"}
                       </td>
-                      <td className="hidden px-4 py-3 text-white/50 lg:table-cell">
+                      <td className="hidden px-4 py-3 text-muted-foreground lg:table-cell">
                         {member.city || "-"}
                       </td>
                       <td className="px-4 py-3">
@@ -233,7 +233,7 @@ export default function AdminPage() {
                               : "border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10"
                           )}
                         >
-                          {member.isActive ? "Desactiver" : "Activer"}
+                          {member.isActive ? "D\u00e9sactiver" : "Activer"}
                         </button>
                       </td>
                     </tr>
@@ -245,7 +245,7 @@ export default function AdminPage() {
         {/* Pagination hint */}
         {membersData?.nextCursor && (
           <div className="mt-4 flex justify-center">
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-muted-foreground/60">
               Affichage des {limit} premiers membres
             </p>
           </div>

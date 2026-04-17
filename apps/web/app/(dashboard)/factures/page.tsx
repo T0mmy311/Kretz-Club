@@ -41,65 +41,65 @@ export default function FacturesPage() {
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-white">Factures</h2>
-        <p className="mt-1 text-[13px] text-white/40">
+        <h2 className="text-xl font-semibold text-foreground">Factures</h2>
+        <p className="mt-1 text-[13px] text-muted-foreground">
           Retrouvez toutes vos factures
         </p>
       </div>
 
       {isLoading ? (
         <div className="flex h-48 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-white/30" />
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground/60" />
         </div>
       ) : items.length === 0 ? (
-        <div className="flex h-48 flex-col items-center justify-center text-white/30">
+        <div className="flex h-48 flex-col items-center justify-center text-muted-foreground/60">
           <FileText className="h-10 w-10 opacity-20" />
           <p className="mt-4 text-[14px]">Aucune facture</p>
-          <p className="mt-1 text-[12px] text-white/20">{"Vos factures appara\u00eetront ici apr\u00e8s un paiement"}</p>
+          <p className="mt-1 text-[12px] text-muted-foreground/40">{"Vos factures appara\u00eetront ici apr\u00e8s un paiement"}</p>
         </div>
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden sm:block overflow-x-auto rounded-lg border border-white/[0.06]">
+          <div className="hidden sm:block overflow-x-auto rounded-lg border border-border">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-white/30">
+                <tr className="border-b border-border">
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     {"Num\u00e9ro"}
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-white/30">
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-white/30">
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     Description
                   </th>
-                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-white/30">
+                  <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     Statut
                   </th>
-                  <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-white/30">
+                  <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     Montant
                   </th>
-                  <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-white/30">
+                  <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((invoice: any) => (
-                  <tr key={invoice.id} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors">
+                  <tr key={invoice.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
-                      <span className="text-[13px] font-medium text-white/80">{invoice.invoiceNumber}</span>
+                      <span className="text-[13px] font-medium text-foreground/80">{invoice.invoiceNumber}</span>
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-white/40">
+                    <td className="px-4 py-3 text-[13px] text-muted-foreground">
                       {formatDate(invoice.issuedAt)}
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-white/60">
+                    <td className="px-4 py-3 text-[13px] text-muted-foreground">
                       {invoice.description ?? invoice.event?.title ?? "-"}
                     </td>
                     <td className="px-4 py-3">
                       {getStatusBadge(invoice.paidAt)}
                     </td>
-                    <td className="px-4 py-3 text-right text-[13px] font-medium text-white/80">
+                    <td className="px-4 py-3 text-right text-[13px] font-medium text-foreground/80">
                       {formatAmount(invoice.totalAmount)}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -107,7 +107,7 @@ export default function FacturesPage() {
                         href={`/api/invoice/${invoice.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-white/60 hover:bg-white/[0.1] hover:text-white transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-md bg-muted/50 px-3 py-1.5 text-[12px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                       >
                         <Eye className="h-3 w-3" />
                         Voir
@@ -122,21 +122,21 @@ export default function FacturesPage() {
           {/* Mobile cards */}
           <div className="sm:hidden space-y-3">
             {items.map((invoice: any) => (
-              <div key={invoice.id} className="rounded-lg border border-white/[0.06] p-4 space-y-3">
+              <div key={invoice.id} className="rounded-lg border border-border p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-medium text-white/80">{invoice.invoiceNumber}</span>
+                  <span className="text-[13px] font-medium text-foreground/80">{invoice.invoiceNumber}</span>
                   {getStatusBadge(invoice.paidAt)}
                 </div>
-                <p className="text-[13px] text-white/50">{invoice.description ?? invoice.event?.title ?? "-"}</p>
+                <p className="text-[13px] text-muted-foreground">{invoice.description ?? invoice.event?.title ?? "-"}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] text-white/30">{formatDate(invoice.issuedAt)}</span>
-                  <span className="text-[14px] font-semibold text-white/80">{formatAmount(invoice.totalAmount)}</span>
+                  <span className="text-[12px] text-muted-foreground/60">{formatDate(invoice.issuedAt)}</span>
+                  <span className="text-[14px] font-semibold text-foreground/80">{formatAmount(invoice.totalAmount)}</span>
                 </div>
                 <a
                   href={`/api/invoice/${invoice.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-md bg-white/[0.06] py-2 text-[12px] font-medium text-white/60 hover:bg-white/[0.1] transition-colors"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-md bg-muted/50 py-2 text-[12px] font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
                   <Eye className="h-3 w-3" />
                   {"Voir la facture"}

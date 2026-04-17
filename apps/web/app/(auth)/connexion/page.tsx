@@ -79,6 +79,12 @@ export default function ConnexionPage() {
         </button>
       </form>
 
+      <p className="text-center text-[13px]">
+        <Link href="/mot-de-passe-oublie" className="font-medium text-white/40 hover:text-white transition-colors">
+          {"Mot de passe oubli\u00e9 ?"}
+        </Link>
+      </p>
+
       <p className="text-center text-[13px] text-white/30">
         {"Pas encore membre ? "}
         <Link href="/inscription" className="font-medium text-white/60 hover:text-white transition-colors">

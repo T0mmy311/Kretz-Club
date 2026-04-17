@@ -199,30 +199,36 @@ export default function AnnuairePage() {
               key={member.id}
               className="flex flex-col items-center rounded-xl border border-border/50 bg-card p-5 text-center shadow-sm transition-all hover:shadow-md hover:border-primary/30"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-lg font-bold text-black">
-                {getInitials(member.firstName, member.lastName)}
-              </div>
-              <h3 className="mt-3 font-semibold">
-                {member.firstName} {member.lastName}
-              </h3>
-              {member.profession && (
-                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <Briefcase className="h-3 w-3" />
-                  {member.profession}
-                </p>
-              )}
-              {member.company && (
-                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Building2 className="h-3 w-3" />
-                  {member.company}
-                </p>
-              )}
-              {member.city && (
-                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  {member.city}
-                </p>
-              )}
+              <Link href={`/annuaire/${member.id}`} className="flex flex-col items-center">
+                {member.avatarUrl ? (
+                  <img src={member.avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full gradient-gold text-lg font-bold text-black">
+                    {getInitials(member.firstName, member.lastName)}
+                  </div>
+                )}
+                <h3 className="mt-3 font-semibold">
+                  {member.firstName} {member.lastName}
+                </h3>
+                {member.profession && (
+                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                    <Briefcase className="h-3 w-3" />
+                    {member.profession}
+                  </p>
+                )}
+                {member.company && (
+                  <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                    <Building2 className="h-3 w-3" />
+                    {member.company}
+                  </p>
+                )}
+                {member.city && (
+                  <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    {member.city}
+                  </p>
+                )}
+              </Link>
               {currentMemberId === member.id ? (
                 <Link
                   href="/profil"

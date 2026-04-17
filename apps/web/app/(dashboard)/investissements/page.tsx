@@ -57,14 +57,14 @@ export default function InvestissementsPage() {
     <div className="p-4 lg:p-6">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">Investissements</h2>
-          <p className="mt-1 text-[13px] text-white/40">
+          <h2 className="text-xl font-semibold text-foreground">Investissements</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">
             {"D\u00e9couvrez les opportunit\u00e9s d\u2019investissement du Kretz Club"}
           </p>
         </div>
         <Link
           href="/investissements/portfolio"
-          className="flex items-center gap-2 rounded-md bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/60 hover:bg-white/[0.1] transition-colors"
+          className="flex items-center gap-2 rounded-md bg-muted/50 px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted transition-colors"
         >
           <BarChart3 className="h-4 w-4" />
           Mon portfolio
@@ -198,9 +198,12 @@ export default function InvestissementsPage() {
                         Voir le deck
                       </a>
                     )}
-                    <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent">
+                    <Link
+                      href={`/investissements/${investment.id}`}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
+                    >
                       {"D\u00e9tails"}
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

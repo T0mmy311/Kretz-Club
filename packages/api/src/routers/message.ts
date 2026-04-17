@@ -106,6 +106,35 @@ export const messageRouter = router({
               avatarUrl: true,
             },
           },
+          parent: {
+            select: {
+              id: true,
+              content: true,
+              author: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+          },
+          reactions: {
+            select: {
+              id: true,
+              emoji: true,
+              memberId: true,
+            },
+          },
+          attachments: {
+            select: {
+              id: true,
+              fileName: true,
+              fileType: true,
+              fileSize: true,
+              storagePath: true,
+            },
+          },
           _count: { select: { replies: true } },
         },
       });

@@ -130,13 +130,13 @@ export default function SearchPalette() {
         <div className="max-h-[50vh] overflow-y-auto p-2">
           {!enabled && (
             <div className="px-3 py-8 text-center text-sm text-white/20">
-              Tapez au moins 2 caracteres pour rechercher
+              {"Tapez au moins 2 caract\u00e8res pour rechercher"}
             </div>
           )}
 
           {enabled && !hasResults && (
             <div className="px-3 py-8 text-center text-sm text-white/20">
-              Aucun resultat pour &quot;{debouncedQuery}&quot;
+              {"Aucun r\u00e9sultat pour \u00ab\u202f"}{debouncedQuery}{"\u202f\u00bb"}
             </div>
           )}
 

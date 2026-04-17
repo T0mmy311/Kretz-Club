@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function InscriptionPage() {
@@ -22,7 +23,7 @@ export default function InscriptionPage() {
     setError(null);
 
     if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
+      setError("Le mot de passe doit contenir au moins 6 caract\u00e8res");
       setLoading(false);
       return;
     }
@@ -36,12 +37,12 @@ export default function InscriptionPage() {
       });
       const inviteData = await inviteRes.json();
       if (!inviteData.valid) {
-        setError("Code d'invitation invalide ou expiré");
+        setError("Code d'invitation invalide ou expir\u00e9");
         setLoading(false);
         return;
       }
     } catch {
-      setError("Erreur lors de la vérification du code d'invitation");
+      setError("Erreur lors de la v\u00e9rification du code d'invitation");
       setLoading(false);
       return;
     }
@@ -95,21 +96,19 @@ export default function InscriptionPage() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-xl border bg-card p-8 shadow-sm">
+    <div className="w-full max-w-sm space-y-8 p-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Kretz Club</h1>
-        <p className="mt-2 text-muted-foreground">
+        <img src="/logo-kretz-club.svg" alt="Kretz Club" className="mx-auto mb-6 h-16 w-16 opacity-90" />
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Kretz Club</h1>
+        <p className="mt-2 text-[13px] text-white/40">
           {"Cr\u00e9ez votre compte"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="inviteCode"
-            className="block text-sm font-medium text-foreground"
-          >
-            {"Code d'invitation"}
+          <label htmlFor="inviteCode" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">
+            {"Code d\u2019invitation"}
           </label>
           <input
             id="inviteCode"
@@ -118,16 +117,13 @@ export default function InscriptionPage() {
             onChange={(e) => setInviteCode(e.target.value)}
             placeholder="Entrez votre code d'invitation"
             required
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-foreground"
-            >
+            <label htmlFor="firstName" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">
               {"Pr\u00e9nom"}
             </label>
             <input
@@ -136,14 +132,11 @@ export default function InscriptionPage() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
             />
           </div>
           <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-foreground"
-            >
+            <label htmlFor="lastName" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">
               Nom
             </label>
             <input
@@ -152,16 +145,13 @@ export default function InscriptionPage() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
-              className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
             />
           </div>
         </div>
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="email" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">
             Adresse email
           </label>
           <input
@@ -171,15 +161,12 @@ export default function InscriptionPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="vous@exemple.com"
             required
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="password" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">
             Mot de passe
           </label>
           <input
@@ -187,28 +174,28 @@ export default function InscriptionPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Minimum 6 caractères"
+            placeholder={"Minimum 6 caract\u00e8res"}
             required
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
           />
         </div>
 
         {error && (
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-[13px] text-red-400">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="w-full rounded-md bg-white px-4 py-2.5 text-[14px] font-semibold text-black hover:bg-white/90 disabled:opacity-50 transition-colors"
         >
-          {loading ? "Création..." : "Créer mon compte"}
+          {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Cr\u00e9er mon compte"}
         </button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
-        {"Déjà membre ? "}
-        <Link href="/connexion" className="font-medium text-foreground hover:underline">
+      <p className="text-center text-[13px] text-white/30">
+        {"D\u00e9j\u00e0 membre ? "}
+        <Link href="/connexion" className="font-medium text-white/60 hover:text-white transition-colors">
           Se connecter
         </Link>
       </p>

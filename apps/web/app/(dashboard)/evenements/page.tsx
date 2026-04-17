@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { Calendar, MapPin, Euro, CalendarPlus, Loader2, Check } from "lucide-react";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
 const tabs = [
-  { label: "A venir", value: "upcoming" },
-  { label: "Passes", value: "past" },
+  { label: "\u00c0 venir", value: "upcoming" },
+  { label: "Pass\u00e9s", value: "past" },
 ];
 
 export default function EvenementsPage() {
@@ -43,9 +44,9 @@ export default function EvenementsPage() {
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold">Evenements</h2>
+        <h2 className="text-2xl font-bold">{"\u00c9v\u00e9nements"}</h2>
         <p className="mt-1 text-muted-foreground">
-          Retrouvez tous les evenements du Kretz Club
+          {"Retrouvez tous les \u00e9v\u00e9nements du Kretz Club"}
         </p>
       </div>
 
@@ -107,7 +108,9 @@ export default function EvenementsPage() {
 
               {/* Content */}
               <div className="p-4">
-                <h3 className="font-semibold">{event.title}</h3>
+                <Link href={`/evenements/${event.id}`}>
+                  <h3 className="font-semibold hover:underline">{event.title}</h3>
+                </Link>
 
                 {event.description && (
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{event.description}</p>
