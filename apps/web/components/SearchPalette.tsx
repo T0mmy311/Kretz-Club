@@ -61,6 +61,11 @@ export default function SearchPalette() {
     { enabled }
   );
 
+  const { data: messageResults } = trpc.message.searchMessages.useQuery(
+    { query: debouncedQuery, limit: 8 },
+    { enabled }
+  );
+
   // Filter channels locally
   const filteredChannels = enabled
     ? Object.values(channelData ?? {})
@@ -82,10 +87,47 @@ export default function SearchPalette() {
     : [];
 
   const members = memberResults?.items ?? [];
+  const messages = (messageResults?.items ?? []) as any[];
   const hasResults =
     members.length > 0 ||
     filteredChannels.length > 0 ||
-    filteredInvestments.length > 0;
+    filteredInvestments.length > 0 ||
+    messages.length > 0;
+
+  const formatMessageDate = (date: Date | string) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMin = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffMin < 1) return "à l'instant";
+    if (diffMin < 60) return `il y a ${diffMin} min`;
+    if (diffHours < 24) return `il y a ${diffHours}h`;
+    if (diffDays < 7) return `il y a ${diffDays}j`;
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  };
+
+  const renderHighlighted = (text: string, q: string) => {
+    if (!q) return text;
+    const lower = text.toLowerCase();
+    const qLower = q.toLowerCase();
+    const idx = lower.indexOf(qLower);
+    if (idx === -1) return text;
+    // Show context around the match
+    const start = Math.max(0, idx - 30);
+    const end = Math.min(text.length, idx + qLower.length + 60);
+    const before = (start > 0 ? "…" : "") + text.slice(start, idx);
+    const match = text.slice(idx, idx + qLower.length);
+    const after = text.slice(idx + qLower.length, end) + (end < text.length ? "…" : "");
+    return (
+      <>
+        {before}
+        <mark className="rounded bg-yellow-500/30 px-0.5 text-white/95">{match}</mark>
+        {after}
+      </>
+    );
+  };
 
   const navigate = useCallback(
     (href: string) => {
@@ -197,6 +239,56 @@ export default function SearchPalette() {
                   </div>
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Messages */}
+          {messages.length > 0 && (
+            <div className="mb-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
+                <MessageSquare className="h-3.5 w-3.5" />
+                Messages
+              </div>
+              {messages.map((msg) => {
+                const isChannel = !!msg.channelId;
+                const href = isChannel
+                  ? `/messagerie/${msg.channelId}#message-${msg.id}`
+                  : `/messagerie/dm/${msg.conversationId}#message-${msg.id}`;
+                const contextLabel = isChannel
+                  ? `#${msg.channel?.displayName ?? msg.channel?.name ?? "channel"}`
+                  : (() => {
+                      const other = msg.conversation?.participants?.[0]?.member;
+                      return other
+                        ? `${other.firstName} ${other.lastName}`
+                        : "Conversation";
+                    })();
+                const authorName = `${msg.author?.firstName ?? ""} ${msg.author?.lastName ?? ""}`.trim();
+                return (
+                  <button
+                    key={msg.id}
+                    onClick={() => navigate(href)}
+                    className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/50">
+                      <MessageSquare className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 text-xs text-white/40">
+                        <span className="truncate font-medium text-white/70">
+                          {authorName || "Membre"}
+                        </span>
+                        <span className="truncate">dans {contextLabel}</span>
+                        <span className="ml-auto shrink-0">
+                          {formatMessageDate(msg.createdAt)}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 line-clamp-2 text-[13px] text-white/80">
+                        {renderHighlighted(msg.content ?? "", debouncedQuery)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
 

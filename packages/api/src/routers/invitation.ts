@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { prisma } from "@kretz/db";
 import { router, protectedProcedure, adminProcedure } from "../trpc";
+import { logAction } from "../lib/audit";
 
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -34,6 +35,14 @@ export const invitationRouter = router({
           invitedById: ctx.member.id,
           expiresAt,
         },
+      });
+
+      await logAction(prisma, {
+        actorId: ctx.member.id,
+        action: "invitation.create",
+        targetType: "invitation",
+        targetId: invitation.id,
+        metadata: { code: invitation.code, email: invitation.email },
       });
 
       return invitation;
@@ -114,5 +123,44 @@ export const invitationRouter = router({
       });
 
       return updated;
+    }),
+
+  /**
+   * Delete an invitation (admin only). Only allowed for unused invitations.
+   */
+  delete: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const invitation = await prisma.invitation.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!invitation) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invitation introuvable",
+        });
+      }
+
+      if (invitation.usedAt) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Impossible de supprimer une invitation déjà utilisée",
+        });
+      }
+
+      await prisma.invitation.delete({
+        where: { id: input.id },
+      });
+
+      await logAction(prisma, {
+        actorId: ctx.member.id,
+        action: "invitation.delete",
+        targetType: "invitation",
+        targetId: invitation.id,
+        metadata: { code: invitation.code, email: invitation.email },
+      });
+
+      return { success: true };
     }),
 });

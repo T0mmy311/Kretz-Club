@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@kretz/db";
+import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const rateLimit = checkRateLimit(
+      getRateLimitKey(request, "upload-attachment"),
+      30,
+      60 * 60 * 1000
+    );
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.max(1, Math.ceil((rateLimit.resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        { error: "Trop de requêtes, veuillez patienter" },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },

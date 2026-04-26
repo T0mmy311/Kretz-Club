@@ -34,8 +34,11 @@ export const eventRouter = router({
         include: {
           _count: { select: { registrations: true } },
           registrations: {
-            where: { memberId: ctx.member.id },
-            select: { id: true },
+            where: {
+              memberId: ctx.member.id,
+              paymentStatus: { not: "pending" },
+            },
+            select: { id: true, paymentStatus: true },
           },
         },
       });
@@ -111,10 +114,21 @@ export const eventRouter = router({
         throw new TRPCError({ code: "CONFLICT", message: "Vous êtes déjà inscrit à cet événement" });
       }
 
+      // Free events: skip Stripe and mark as paid immediately.
+      // Paid events should go through /api/checkout/event/[id] instead.
+      if (Number(event.price) > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Cet événement est payant — utilisez le paiement par carte.",
+        });
+      }
+
       const registration = await prisma.eventRegistration.create({
         data: {
           eventId: input.eventId,
           memberId: ctx.member.id,
+          paymentStatus: "paid",
         },
       });
 
@@ -126,10 +140,23 @@ export const eventRouter = router({
     .mutation(async ({ ctx, input }) => {
       const registration = await prisma.eventRegistration.findUnique({
         where: { eventId_memberId: { eventId: input.eventId, memberId: ctx.member.id } },
+        include: { event: { select: { price: true } } },
       });
 
       if (!registration) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Inscription introuvable" });
+      }
+
+      // Refunds for paid registrations must be handled out-of-band.
+      if (
+        Number(registration.event.price) > 0 &&
+        registration.paymentStatus === "paid"
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Annulation impossible pour un événement payant. Contactez l'organisateur pour un remboursement.",
+        });
       }
 
       await prisma.eventRegistration.delete({

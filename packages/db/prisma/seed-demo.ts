@@ -308,8 +308,8 @@ async function main() {
     for (const member of attendees) {
       await prisma.eventRegistration.upsert({
         where: { eventId_memberId: { eventId: event.id, memberId: member.id } },
-        create: { eventId: event.id, memberId: member.id },
-        update: {},
+        create: { eventId: event.id, memberId: member.id, paymentStatus: "paid" },
+        update: { paymentStatus: "paid" },
       });
     }
   }

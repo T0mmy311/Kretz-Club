@@ -16,6 +16,7 @@ import { adminRouter } from "./routers/admin";
 import { invitationRouter } from "./routers/invitation";
 import { pollRouter } from "./routers/poll";
 import { attachmentRouter } from "./routers/attachment";
+import { auditRouter } from "./routers/audit";
 
 export const appRouter = router({
   channel: channelRouter,
@@ -35,6 +36,7 @@ export const appRouter = router({
   invitation: invitationRouter,
   poll: pollRouter,
   attachment: attachmentRouter,
+  audit: auditRouter,
 });
 
 export type AppRouter = typeof appRouter;

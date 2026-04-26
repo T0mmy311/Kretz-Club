@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, MapPin, Euro, CalendarPlus, Loader2, Check } from "lucide-react";
+import { Calendar, MapPin, Euro, CalendarPlus, Loader2, Check, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,28 @@ const tabs = [
 export default function EvenementsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [checkoutLoadingId, setCheckoutLoadingId] = useState<string | null>(null);
+
+  const startPaidCheckout = async (eventId: string) => {
+    setErrorMsg(null);
+    setCheckoutLoadingId(eventId);
+    try {
+      const res = await fetch(`/api/checkout/event/${eventId}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setErrorMsg(data.error ?? "Impossible de démarrer le paiement");
+        setCheckoutLoadingId(null);
+        return;
+      }
+      window.location.href = data.url;
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Erreur réseau lors du paiement");
+      setCheckoutLoadingId(null);
+    }
+  };
   const utils = trpc.useUtils();
   const { data, isLoading } = trpc.event.list.useQuery({
     status: activeTab as "upcoming" | "past",
@@ -138,33 +160,62 @@ export default function EvenementsPage() {
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  {event.registrations && event.registrations.length > 0 ? (
-                    <button
-                      disabled
-                      className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-600/20 px-4 py-2 text-sm font-medium text-green-600 cursor-default"
-                    >
-                      <Check className="h-4 w-4" />
-                      {"Inscrit \u2713"}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setErrorMsg(null);
-                        register.mutate({ eventId: event.id });
-                      }}
-                      disabled={register.isPending}
-                      className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                    >
-                      {register.isPending ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Inscription...
-                        </>
-                      ) : (
-                        "S\u2019inscrire"
-                      )}
-                    </button>
-                  )}
+                  {(() => {
+                    const priceEuros = Number(event.price);
+                    const isPaid = priceEuros > 0;
+                    const isCheckoutLoading = checkoutLoadingId === event.id;
+                    if (event.registrations && event.registrations.length > 0) {
+                      return (
+                        <button
+                          disabled
+                          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-green-600/20 px-4 py-2 text-sm font-medium text-green-600 cursor-default"
+                        >
+                          <Check className="h-4 w-4" />
+                          {"Inscrit \u2713"}
+                        </button>
+                      );
+                    }
+                    if (isPaid) {
+                      return (
+                        <button
+                          onClick={() => startPaidCheckout(event.id)}
+                          disabled={isCheckoutLoading}
+                          className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                        >
+                          {isCheckoutLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Redirection...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="h-4 w-4" />
+                              {`Payer ${priceEuros.toLocaleString("fr-FR")} \u20ac`}
+                            </>
+                          )}
+                        </button>
+                      );
+                    }
+                    return (
+                      <button
+                        onClick={() => {
+                          setErrorMsg(null);
+                          register.mutate({ eventId: event.id });
+                        }}
+                        disabled={register.isPending}
+                        className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                      >
+                        {register.isPending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Inscription...
+                          </>
+                        ) : (
+                          "S\u2019inscrire"
+                        )}
+                      </button>
+                    );
+                  })()}
                   <button
                     onClick={async () => {
                       const res = await fetch(`/api/event/${event.id}/ics`);

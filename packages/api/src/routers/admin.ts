@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@kretz/db";
 import { router, adminProcedure } from "../trpc";
+import { logAction } from "../lib/audit";
 
 export const adminRouter = router({
   stats: adminProcedure.query(async () => {
@@ -55,10 +56,10 @@ export const adminRouter = router({
 
   toggleMemberActive: adminProcedure
     .input(z.object({ memberId: z.string().uuid() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const member = await prisma.member.findUnique({
         where: { id: input.memberId },
-        select: { isActive: true },
+        select: { isActive: true, firstName: true, lastName: true, email: true },
       });
 
       if (!member) {
@@ -68,6 +69,18 @@ export const adminRouter = router({
       const updated = await prisma.member.update({
         where: { id: input.memberId },
         data: { isActive: !member.isActive },
+      });
+
+      await logAction(prisma, {
+        actorId: ctx.member.id,
+        action: updated.isActive ? "member.activate" : "member.deactivate",
+        targetType: "member",
+        targetId: updated.id,
+        metadata: {
+          firstName: member.firstName,
+          lastName: member.lastName,
+          email: member.email,
+        },
       });
 
       return updated;

@@ -13,6 +13,7 @@
     "@kretz/db": "*",
     "@kretz/payments": "*",
     "@kretz/shared": "*",
+    "@stripe/stripe-js": "^9.3.1",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "@tailwindcss/postcss": "latest",
@@ -26,6 +27,8 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "recharts": "^3.8.1",
+    "stripe": "^22.1.0",
     "superjson": "latest",
     "tailwind-merge": "latest",
     "tailwindcss": "latest"

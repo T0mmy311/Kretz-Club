@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -12,11 +13,15 @@ import {
   Loader2,
   Check,
   X,
+  CreditCard,
+  AlertCircle,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 
 export default function EventDetailPage() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params.id as string;
   const utils = trpc.useUtils();
 
@@ -33,6 +38,55 @@ export default function EventDetailPage() {
       utils.event.getById.invalidate({ id });
     },
   });
+
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [paymentBanner, setPaymentBanner] = useState<
+    null | { type: "success" | "cancelled"; message: string }
+  >(null);
+
+  // Read ?payment= param once on mount, show banner, then strip it from URL.
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      setPaymentBanner({
+        type: "success",
+        message: "Inscription confirmée — paiement reçu",
+      });
+      utils.event.getById.invalidate({ id });
+      router.replace(`/evenements/${id}`);
+    } else if (payment === "cancelled") {
+      setPaymentBanner({
+        type: "cancelled",
+        message: "Paiement annulé — votre inscription n'a pas été enregistrée",
+      });
+      router.replace(`/evenements/${id}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePaidCheckout = async () => {
+    setCheckoutError(null);
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch(`/api/checkout/event/${id}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setCheckoutError(
+          data.error ?? "Impossible de démarrer le paiement"
+        );
+        setCheckoutLoading(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch (err) {
+      console.error(err);
+      setCheckoutError("Erreur réseau lors du paiement");
+      setCheckoutLoading(false);
+    }
+  };
 
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("fr-FR", {
@@ -82,8 +136,14 @@ export default function EventDetailPage() {
   const registrationCount = event.registrationCount ?? 0;
   const maxAttendees = event.maxAttendees;
   const attendeeProgress = maxAttendees ? Math.min(100, (registrationCount / maxAttendees) * 100) : 0;
-  const isRegistered = !!event.userRegistration;
+  const userRegistration = event.userRegistration;
+  const isRegistered =
+    !!userRegistration && userRegistration.paymentStatus !== "pending";
+  const hasPendingPayment =
+    !!userRegistration && userRegistration.paymentStatus === "pending";
   const isPast = new Date(event.startsAt) < new Date();
+  const priceEuros = Number(event.price);
+  const isPaid = priceEuros > 0;
 
   return (
     <div className="p-4 lg:p-6">
@@ -178,6 +238,24 @@ export default function EventDetailPage() {
         </div>
       )}
 
+      {/* Payment banner (success / cancelled) */}
+      {paymentBanner && (
+        <div
+          className={
+            paymentBanner.type === "success"
+              ? "mb-6 flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-3 text-[14px] font-medium text-green-400"
+              : "mb-6 flex items-center gap-2 rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-[14px] font-medium text-yellow-400"
+          }
+        >
+          {paymentBanner.type === "success" ? (
+            <Check className="h-4 w-4" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          {paymentBanner.message}
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
         {!isPast && (
@@ -186,21 +264,41 @@ export default function EventDetailPage() {
               <>
                 <div className="flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/10 px-5 py-2.5 text-[14px] font-medium text-green-400">
                   <Check className="h-4 w-4" />
-                  {"Inscrit"}
+                  {isPaid ? "Inscrit (payé)" : "Inscrit"}
                 </div>
-                <button
-                  onClick={() => unregister.mutate({ eventId: id })}
-                  disabled={unregister.isPending}
-                  className="flex items-center gap-2 rounded-lg border border-red-500/20 px-4 py-2.5 text-[14px] font-medium text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                >
-                  {unregister.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <X className="h-4 w-4" />
-                  )}
-                  Annuler mon inscription
-                </button>
+                {!isPaid && (
+                  <button
+                    onClick={() => unregister.mutate({ eventId: id })}
+                    disabled={unregister.isPending}
+                    className="flex items-center gap-2 rounded-lg border border-red-500/20 px-4 py-2.5 text-[14px] font-medium text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                  >
+                    {unregister.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
+                    Annuler mon inscription
+                  </button>
+                )}
               </>
+            ) : isPaid ? (
+              <button
+                onClick={handlePaidCheckout}
+                disabled={checkoutLoading}
+                className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-[14px] font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {checkoutLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Redirection...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4" />
+                    {`Payer ${priceEuros.toLocaleString("fr-FR")} €`}
+                  </>
+                )}
+              </button>
             ) : (
               <button
                 onClick={() => register.mutate({ eventId: id })}
@@ -226,7 +324,16 @@ export default function EventDetailPage() {
         </button>
       </div>
 
+      {hasPendingPayment && !paymentBanner && (
+        <p className="mt-4 text-[13px] text-yellow-400">
+          {"Un paiement est en cours. Cliquez sur \"Payer\" pour le finaliser."}
+        </p>
+      )}
+
       {/* Error messages */}
+      {checkoutError && (
+        <p className="mt-4 text-[13px] text-red-400">{checkoutError}</p>
+      )}
       {register.error && (
         <p className="mt-4 text-[13px] text-red-400">{register.error.message}</p>
       )}

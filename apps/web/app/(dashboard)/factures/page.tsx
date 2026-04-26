@@ -1,6 +1,7 @@
 "use client";
 
-import { Download, FileText, Eye, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Download, FileText, Eye, Loader2, Calendar } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 
 export default function FacturesPage() {
@@ -94,7 +95,17 @@ export default function FacturesPage() {
                       {formatDate(invoice.issuedAt)}
                     </td>
                     <td className="px-4 py-3 text-[13px] text-muted-foreground">
-                      {invoice.description ?? invoice.event?.title ?? "-"}
+                      {invoice.event ? (
+                        <Link
+                          href={`/evenements/${invoice.event.id}`}
+                          className="inline-flex items-center gap-1.5 text-foreground/80 hover:text-foreground hover:underline"
+                        >
+                          <Calendar className="h-3 w-3" />
+                          {invoice.description ?? invoice.event.title}
+                        </Link>
+                      ) : (
+                        invoice.description ?? "-"
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       {getStatusBadge(invoice.paidAt)}
@@ -127,7 +138,17 @@ export default function FacturesPage() {
                   <span className="text-[13px] font-medium text-foreground/80">{invoice.invoiceNumber}</span>
                   {getStatusBadge(invoice.paidAt)}
                 </div>
-                <p className="text-[13px] text-muted-foreground">{invoice.description ?? invoice.event?.title ?? "-"}</p>
+                {invoice.event ? (
+                  <Link
+                    href={`/evenements/${invoice.event.id}`}
+                    className="inline-flex items-center gap-1.5 text-[13px] text-foreground/80 hover:underline"
+                  >
+                    <Calendar className="h-3 w-3" />
+                    {invoice.description ?? invoice.event.title}
+                  </Link>
+                ) : (
+                  <p className="text-[13px] text-muted-foreground">{invoice.description ?? "-"}</p>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-[12px] text-muted-foreground/60">{formatDate(invoice.issuedAt)}</span>
                   <span className="text-[14px] font-semibold text-foreground/80">{formatAmount(invoice.totalAmount)}</span>

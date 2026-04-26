@@ -253,6 +253,7 @@ export default function ChannelPage({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -397,8 +398,36 @@ export default function ChannelPage({
 
   // -- scroll to bottom -------------------------------------------------------
   useEffect(() => {
+    // If a hash targets a specific message, don't auto-scroll to bottom.
+    if (typeof window !== "undefined" && window.location.hash.startsWith("#message-")) {
+      return;
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesData?.messages]);
+
+  // -- scroll to message from URL hash + flash highlight ----------------------
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!messagesData?.messages || messagesData.messages.length === 0) return;
+
+    const hash = window.location.hash;
+    if (!hash.startsWith("#message-")) return;
+
+    const messageId = hash.replace("#message-", "");
+    if (!messageId) return;
+
+    // Wait briefly for the DOM to render the messages list
+    const t = setTimeout(() => {
+      const el = document.getElementById(`message-${messageId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setHighlightedMessageId(messageId);
+        setTimeout(() => setHighlightedMessageId(null), 2000);
+      }
+    }, 100);
+
+    return () => clearTimeout(t);
+  }, [messagesData?.messages, channelId]);
 
   // -- handlers ---------------------------------------------------------------
   const broadcastTyping = useCallback(() => {
@@ -550,7 +579,12 @@ export default function ChannelPage({
                   return (
                     <div
                       key={msg.id}
-                      className="group relative flex items-start gap-3 px-4 py-1.5 hover:bg-muted/30"
+                      id={`message-${msg.id}`}
+                      className={`group relative flex items-start gap-3 px-4 py-1.5 hover:bg-muted/30 transition-colors duration-700 ${
+                        highlightedMessageId === msg.id
+                          ? "bg-yellow-500/20 hover:bg-yellow-500/20"
+                          : ""
+                      }`}
                     >
                       {/* Hover action bar */}
                       <MessageActions

@@ -412,6 +412,65 @@ export const messageRouter = router({
     }),
 
   /**
+   * Search messages across the member's accessible channels and conversations.
+   */
+  searchMessages: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().min(2).max(100),
+        channelId: z.string().uuid().optional(),
+        limit: z.number().int().min(1).max(50).default(20),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      // Find member's accessible channels
+      const memberChannels = await prisma.channelMember.findMany({
+        where: { memberId: ctx.member.id },
+        select: { channelId: true },
+      });
+      const channelIds = memberChannels.map((c) => c.channelId);
+
+      // Find member's conversations
+      const memberConversations = await prisma.conversationParticipant.findMany({
+        where: { memberId: ctx.member.id },
+        select: { conversationId: true },
+      });
+      const conversationIds = memberConversations.map((c) => c.conversationId);
+
+      const messages = await prisma.message.findMany({
+        where: {
+          content: { contains: input.query, mode: "insensitive" },
+          OR: [
+            { channelId: { in: channelIds } },
+            { conversationId: { in: conversationIds } },
+          ],
+          ...(input.channelId ? { channelId: input.channelId } : {}),
+        },
+        take: input.limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          author: {
+            select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+          },
+          channel: { select: { id: true, displayName: true, name: true } },
+          conversation: {
+            select: {
+              id: true,
+              participants: {
+                where: { memberId: { not: ctx.member.id } },
+                include: {
+                  member: { select: { firstName: true, lastName: true } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return { items: messages };
+    }),
+
+  /**
    * Get all pinned messages for a channel.
    */
   getPinned: protectedProcedure
