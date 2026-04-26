@@ -27,9 +27,9 @@ function getStatusLabel(status: string) {
     draft: "Brouillon",
     open: "Ouvert",
     funding: "Ouvert",
-    funded: "Finance",
-    closed: "Cloture",
-    cancelled: "Annule",
+    funded: "Financé",
+    closed: "Clôturé",
+    cancelled: "Annulé",
   };
   return map[status] ?? status;
 }
@@ -147,7 +147,7 @@ export default function InvestmentDetailPage() {
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
           <p className="text-[12px] font-medium uppercase tracking-wider text-white/40">Objectif</p>
-          <p className="mt-1 text-lg font-semibold text-white">{target > 0 ? formatAmount(target) : "Non defini"}</p>
+          <p className="mt-1 text-lg font-semibold text-white">{target > 0 ? formatAmount(target) : "Non défini"}</p>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
           <p className="text-[12px] font-medium uppercase tracking-wider text-white/40">Collecte actuelle</p>
@@ -210,7 +210,7 @@ export default function InvestmentDetailPage() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-2.5 text-[14px] font-medium text-green-400">
               <Check className="h-4 w-4" />
-              {"Votre int\u00e9r\u00eat : "}{investment.userInterest.amount ? formatAmount(investment.userInterest.amount) : "Exprime"}
+              {"Votre int\u00e9r\u00eat : "}{investment.userInterest.amount ? formatAmount(investment.userInterest.amount) : "Exprimé"}
             </div>
             {investment.userInterest.status !== "withdrawn" && (
               <button
@@ -223,7 +223,7 @@ export default function InvestmentDetailPage() {
                 ) : (
                   <X className="h-4 w-4" />
                 )}
-                Retirer mon interet
+                Retirer mon intérêt
               </button>
             )}
           </div>

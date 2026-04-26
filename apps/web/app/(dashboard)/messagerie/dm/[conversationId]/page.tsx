@@ -744,7 +744,7 @@ export default function ConversationPage({
           <div className="mb-2 flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs">
             <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
             <span className="truncate text-muted-foreground">
-              R\u00e9ponse \u00e0{" "}
+              {"R\u00e9ponse \u00e0"}{" "}
               <span className="font-medium text-foreground">
                 {replyTo.authorName}
               </span>

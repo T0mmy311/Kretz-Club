@@ -1,20 +1,34 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@kretz/db";
 
 export async function POST(request: Request) {
   try {
-    const { code, memberId } = await request.json();
+    const { code } = await request.json();
 
-    if (!code || !memberId) {
+    if (!code) {
       return NextResponse.json(
-        { error: "Code et memberId requis" },
+        { error: "Code requis" },
         { status: 400 }
+      );
+    }
+
+    // Derive identity from authenticated session
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Non authentifié" },
+        { status: 401 }
       );
     }
 
     // Look up the member by their Supabase auth ID
     const member = await prisma.member.findUnique({
-      where: { supabaseAuthId: memberId },
+      where: { supabaseAuthId: user.id },
     });
 
     if (!member) {
@@ -24,14 +38,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // Mark the invitation as used
-    await prisma.invitation.update({
-      where: { code },
-      data: {
-        usedById: member.id,
-        usedAt: new Date(),
-      },
-    });
+    // Mark the invitation as used (only if not already used)
+    const invitation = await prisma.invitation.findUnique({ where: { code } });
+    if (!invitation) {
+      return NextResponse.json(
+        { error: "Code invalide" },
+        { status: 404 }
+      );
+    }
+
+    if (!invitation.usedAt) {
+      await prisma.invitation.update({
+        where: { code },
+        data: {
+          usedById: member.id,
+          usedAt: new Date(),
+        },
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

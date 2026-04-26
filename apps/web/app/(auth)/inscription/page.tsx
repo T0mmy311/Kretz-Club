@@ -52,7 +52,11 @@ export default function InscriptionPage() {
       email,
       password,
       options: {
-        data: { first_name: firstName, last_name: lastName },
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          invite_code: inviteCode,
+        },
       },
     });
 
@@ -71,28 +75,33 @@ export default function InscriptionPage() {
       return;
     }
 
-    // Auto-create member in DB via API
-    if (data.user) {
-      await fetch("/api/auth/create-member", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          supabaseAuthId: data.user.id,
-          email,
-          firstName,
-          lastName,
-        }),
-      });
+    // If the user already has an active session (no email confirmation required),
+    // create the member record now and consume the invite. Otherwise, the
+    // /api/auth/callback handler will do it after email verification.
+    if (data.session && data.user) {
+      try {
+        await fetch("/api/auth/create-member", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ firstName, lastName }),
+        });
 
-      // Mark invitation code as used
-      await fetch("/api/auth/use-invite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: inviteCode, memberId: data.user.id }),
-      });
+        await fetch("/api/auth/use-invite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: inviteCode }),
+        });
+      } catch {
+        // Non-blocking; the callback / next sign-in will reconcile.
+      }
+
+      router.push("/onboarding");
+      router.refresh();
+      return;
     }
 
-    router.push("/onboarding");
+    // No active session: email verification is required. Send to /verification.
+    router.push("/verification");
     router.refresh();
   };
 

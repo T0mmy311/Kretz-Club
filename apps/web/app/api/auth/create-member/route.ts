@@ -1,44 +1,64 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@kretz/db";
 
 export async function POST(request: Request) {
   try {
-    const { supabaseAuthId, email, firstName, lastName } = await request.json();
+    const { firstName, lastName } = await request.json();
 
-    if (!supabaseAuthId || !email || !firstName || !lastName) {
+    if (!firstName || !lastName) {
       return NextResponse.json(
         { error: "Champs requis manquants" },
         { status: 400 }
       );
     }
 
+    // Derive identity from authenticated session
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !user.email) {
+      return NextResponse.json(
+        { error: "Non authentifié" },
+        { status: 401 }
+      );
+    }
+
     const existing = await prisma.member.findUnique({
-      where: { supabaseAuthId },
+      where: { supabaseAuthId: user.id },
     });
 
     if (existing) {
+      // Auto-join all channels for safety (idempotent)
+      const channels = await prisma.channel.findMany({ select: { id: true } });
+      if (channels.length > 0) {
+        await prisma.channelMember.createMany({
+          data: channels.map((c) => ({ channelId: c.id, memberId: existing.id })),
+          skipDuplicates: true,
+        });
+      }
       return NextResponse.json({ member: existing });
-    }
-
-    // Check if this is the very first user (bootstrap without invite)
-    const memberCount = await prisma.member.count();
-    const isFirstUser = memberCount === 0;
-
-    // If not the first user, an invitation must have been validated separately
-    // (via /api/auth/validate-invite before signup)
-    if (!isFirstUser) {
-      // The invite validation is handled by the signup flow;
-      // this endpoint just creates the member record
     }
 
     const member = await prisma.member.create({
       data: {
-        supabaseAuthId,
-        email,
+        supabaseAuthId: user.id,
+        email: user.email,
         firstName,
         lastName,
       },
     });
+
+    // Auto-join all channels
+    const channels = await prisma.channel.findMany({ select: { id: true } });
+    if (channels.length > 0) {
+      await prisma.channelMember.createMany({
+        data: channels.map((c) => ({ channelId: c.id, memberId: member.id })),
+        skipDuplicates: true,
+      });
+    }
 
     return NextResponse.json({ member });
   } catch (error) {

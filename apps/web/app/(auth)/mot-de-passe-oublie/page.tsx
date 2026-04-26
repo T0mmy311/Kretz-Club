@@ -22,7 +22,7 @@ export default function MotDePasseOubliePage() {
     });
 
     if (error) {
-      setError("Une erreur est survenue. Veuillez verifier votre adresse email et reessayer.");
+      setError("Une erreur est survenue. Veuillez vérifier votre adresse email et réessayer.");
       setLoading(false);
       return;
     }
@@ -35,7 +35,7 @@ export default function MotDePasseOubliePage() {
     <div className="w-full max-w-sm space-y-8 p-8">
       <div className="text-center">
         <img src="/logo-kretz-club.svg" alt="Kretz Club" className="mx-auto mb-6 h-16 w-16 opacity-90" />
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Mot de passe oublie</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Mot de passe oublié</h1>
         <p className="mt-2 text-[13px] text-white/40">
           {"Entrez votre email pour recevoir un lien de r\u00e9initialisation"}
         </p>
