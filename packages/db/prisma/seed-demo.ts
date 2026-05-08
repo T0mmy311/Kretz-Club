@@ -98,6 +98,7 @@ const EVENTS_DATA = [
     endsAt: new Date("2026-04-15T23:00:00"),
     price: 150,
     maxAttendees: 80,
+    coverImageUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800",
   },
   {
     title: "Masterclass Investissement - Les clés du off-market",
@@ -108,6 +109,7 @@ const EVENTS_DATA = [
     endsAt: new Date("2026-04-22T17:00:00"),
     price: 0,
     maxAttendees: 30,
+    coverImageUrl: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800",
   },
   {
     title: "Visite privée - Château de Chantilly",
@@ -118,6 +120,7 @@ const EVENTS_DATA = [
     endsAt: new Date("2026-05-10T16:00:00"),
     price: 250,
     maxAttendees: 40,
+    coverImageUrl: "https://images.unsplash.com/photo-1587280501635-068d8e9d76d7?w=800",
   },
   {
     title: "Apéro membres - Rooftop Le Perchoir Marais",
@@ -128,6 +131,7 @@ const EVENTS_DATA = [
     endsAt: new Date("2026-04-03T22:00:00"),
     price: 0,
     maxAttendees: 50,
+    coverImageUrl: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800",
   },
 ];
 
@@ -261,6 +265,7 @@ async function main() {
         endsAt: evt.endsAt,
         price: evt.price,
         maxAttendees: evt.maxAttendees,
+        coverImageUrl: evt.coverImageUrl,
         createdById: thomas.id,
       },
     });

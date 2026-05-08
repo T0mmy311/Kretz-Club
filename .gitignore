@@ -44,3 +44,8 @@ packages/db/prisma/migrations/
 
 # supabase
 supabase/.temp/
+
+# playwright
+test-results/
+playwright-report/
+playwright/.cache/

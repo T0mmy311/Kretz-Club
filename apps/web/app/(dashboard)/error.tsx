@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 export default function DashboardError({
   error,
@@ -10,6 +11,7 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
     console.error("Dashboard error:", error);
   }, [error]);
 
@@ -18,13 +20,13 @@ export default function DashboardError({
       <div className="text-center">
         <h2 className="text-lg font-semibold text-white">Une erreur est survenue</h2>
         <p className="mt-2 text-[13px] text-white/40">
-          {"Nous nous excusons pour la g\u00eane occasionn\u00e9e. Veuillez r\u00e9essayer."}
+          {"Nous nous excusons pour la gêne occasionnée. Veuillez réessayer."}
         </p>
         <button
           onClick={reset}
           className="mt-4 rounded-md bg-white/[0.08] px-4 py-2 text-[13px] font-medium text-white/60 hover:bg-white/[0.12] transition-colors"
         >
-          {"R\u00e9essayer"}
+          {"Réessayer"}
         </button>
       </div>
     </div>

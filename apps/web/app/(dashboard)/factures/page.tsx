@@ -41,11 +41,20 @@ export default function FacturesPage() {
 
   return (
     <div className="p-4 lg:p-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Factures</h2>
-        <p className="mt-1 text-[13px] text-muted-foreground">
-          Retrouvez toutes vos factures
-        </p>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">Factures</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            Retrouvez toutes vos factures
+          </p>
+        </div>
+        <a
+          href="/api/export/my-events"
+          className="inline-flex items-center gap-2 self-start rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[12.5px] font-medium text-foreground/80 hover:border-white/[0.12] hover:bg-white/[0.06] transition-colors sm:self-auto"
+        >
+          <Download className="h-3.5 w-3.5" />
+          {"Exporter mes événements (CSV)"}
+        </a>
       </div>
 
       {isLoading ? (

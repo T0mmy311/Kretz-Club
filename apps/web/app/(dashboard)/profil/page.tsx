@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Save, Camera, Loader2, Shield, ShieldCheck, X } from "lucide-react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { createClient } from "@/lib/supabase/client";
 
@@ -15,12 +16,13 @@ export default function ProfilPage() {
     onSuccess: () => {
       utils.member.me.invalidate();
       utils.member.list.invalidate();
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      toast.success("Profil mis à jour");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de la mise à jour");
     },
   });
 
-  const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -384,11 +386,6 @@ export default function ProfilPage() {
               )}
             </button>
 
-            {saved && (
-              <span className="text-[13px] text-green-400 animate-fade-in">
-                {"Profil mis \u00e0 jour \u2713"}
-              </span>
-            )}
           </div>
         </form>
 

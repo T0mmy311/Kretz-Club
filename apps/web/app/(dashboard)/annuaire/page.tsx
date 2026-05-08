@@ -184,7 +184,18 @@ export default function AnnuairePage() {
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-48 animate-pulse rounded-xl border bg-muted" />
+            <div
+              key={i}
+              className="flex flex-col items-center rounded-xl border border-border/50 bg-card p-5"
+            >
+              <div className="flex w-full animate-pulse flex-col items-center">
+                <div className="h-14 w-14 rounded-full bg-muted/50" />
+                <div className="mt-3 h-4 w-32 rounded bg-muted/50" />
+                <div className="mt-2 h-3 w-24 rounded bg-muted/30" />
+                <div className="mt-1.5 h-3 w-20 rounded bg-muted/30" />
+                <div className="mt-3 h-7 w-full rounded-lg bg-muted/40" />
+              </div>
+            </div>
           ))}
         </div>
       ) : members.length === 0 ? (

@@ -29,7 +29,17 @@ export const investmentRouter = router({
             select: { id: true, firstName: true, lastName: true, avatarUrl: true },
           },
           memberInvestments: {
-            select: { id: true, memberId: true, amount: true, status: true, notes: true },
+            take: 5,
+            select: {
+              id: true,
+              memberId: true,
+              amount: true,
+              status: true,
+              notes: true,
+              member: {
+                select: { firstName: true, lastName: true, avatarUrl: true },
+              },
+            },
           },
         },
       });

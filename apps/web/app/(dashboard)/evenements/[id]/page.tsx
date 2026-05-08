@@ -14,8 +14,8 @@ import {
   Check,
   X,
   CreditCard,
-  AlertCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 
 export default function EventDetailPage() {
@@ -30,43 +30,40 @@ export default function EventDetailPage() {
   const register = trpc.event.register.useMutation({
     onSuccess: () => {
       utils.event.getById.invalidate({ id });
+      toast.success("Inscription confirmée");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de l'inscription");
     },
   });
 
   const unregister = trpc.event.unregister.useMutation({
     onSuccess: () => {
       utils.event.getById.invalidate({ id });
+      toast.success("Inscription annulée");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de l'annulation");
     },
   });
 
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [paymentBanner, setPaymentBanner] = useState<
-    null | { type: "success" | "cancelled"; message: string }
-  >(null);
 
-  // Read ?payment= param once on mount, show banner, then strip it from URL.
+  // Read ?payment= param once on mount, show toast, then strip it from URL.
   useEffect(() => {
     const payment = searchParams.get("payment");
     if (payment === "success") {
-      setPaymentBanner({
-        type: "success",
-        message: "Inscription confirmée — paiement reçu",
-      });
+      toast.success("Inscription confirmée");
       utils.event.getById.invalidate({ id });
       router.replace(`/evenements/${id}`);
     } else if (payment === "cancelled") {
-      setPaymentBanner({
-        type: "cancelled",
-        message: "Paiement annulé — votre inscription n'a pas été enregistrée",
-      });
+      toast.error("Paiement annulé");
       router.replace(`/evenements/${id}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePaidCheckout = async () => {
-    setCheckoutError(null);
     setCheckoutLoading(true);
     try {
       const res = await fetch(`/api/checkout/event/${id}`, {
@@ -74,16 +71,14 @@ export default function EventDetailPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
-        setCheckoutError(
-          data.error ?? "Impossible de démarrer le paiement"
-        );
+        toast.error(data.error ?? "Impossible de démarrer le paiement");
         setCheckoutLoading(false);
         return;
       }
       window.location.href = data.url;
     } catch (err) {
       console.error(err);
-      setCheckoutError("Erreur réseau lors du paiement");
+      toast.error("Erreur réseau lors du paiement");
       setCheckoutLoading(false);
     }
   };
@@ -238,24 +233,6 @@ export default function EventDetailPage() {
         </div>
       )}
 
-      {/* Payment banner (success / cancelled) */}
-      {paymentBanner && (
-        <div
-          className={
-            paymentBanner.type === "success"
-              ? "mb-6 flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/10 px-4 py-3 text-[14px] font-medium text-green-400"
-              : "mb-6 flex items-center gap-2 rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-[14px] font-medium text-yellow-400"
-          }
-        >
-          {paymentBanner.type === "success" ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <AlertCircle className="h-4 w-4" />
-          )}
-          {paymentBanner.message}
-        </div>
-      )}
-
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
         {!isPast && (
@@ -324,21 +301,10 @@ export default function EventDetailPage() {
         </button>
       </div>
 
-      {hasPendingPayment && !paymentBanner && (
+      {hasPendingPayment && (
         <p className="mt-4 text-[13px] text-yellow-400">
           {"Un paiement est en cours. Cliquez sur \"Payer\" pour le finaliser."}
         </p>
-      )}
-
-      {/* Error messages */}
-      {checkoutError && (
-        <p className="mt-4 text-[13px] text-red-400">{checkoutError}</p>
-      )}
-      {register.error && (
-        <p className="mt-4 text-[13px] text-red-400">{register.error.message}</p>
-      )}
-      {unregister.error && (
-        <p className="mt-4 text-[13px] text-red-400">{unregister.error.message}</p>
       )}
     </div>
   );

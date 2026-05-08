@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp, MapPin, ExternalLink, Users, Loader2, BarChart3 } from "lucide-react";
+import { TrendingUp, MapPin, ExternalLink, Users, BarChart3, List, Map as MapIcon } from "lucide-react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
+import { InvestmentMap } from "@/components/InvestmentMap";
 
 const tabs = [
   { label: "Tous", value: "all" },
   { label: "Ouverts", value: "open" },
-  { label: "Financ\u00e9s", value: "funded" },
-  { label: "Cl\u00f4tur\u00e9s", value: "closed" },
+  { label: "Financés", value: "funded" },
+  { label: "Clôturés", value: "closed" },
 ];
 
 function formatAmount(amount: any) {
@@ -23,9 +24,9 @@ function getStatusLabel(status: string) {
     draft: "Brouillon",
     open: "Ouvert",
     funding: "Ouvert",
-    funded: "Financ\u00e9",
-    closed: "Cl\u00f4tur\u00e9",
-    cancelled: "Annul\u00e9",
+    funded: "Financé",
+    closed: "Clôturé",
+    cancelled: "Annulé",
   };
   return map[status] ?? status;
 }
@@ -44,6 +45,7 @@ function getStatusColor(status: string) {
 
 export default function InvestissementsPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const { data, isLoading } = trpc.investment.list.useQuery({});
 
   const investments = data?.items ?? [];
@@ -59,7 +61,7 @@ export default function InvestissementsPage() {
         <div>
           <h2 className="text-xl font-semibold text-foreground">Investissements</h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            {"D\u00e9couvrez les opportunit\u00e9s d\u2019investissement du Kretz Club"}
+            {"Découvrez les opportunités d’investissement du Kretz Club"}
           </p>
         </div>
         <Link
@@ -71,29 +73,79 @@ export default function InvestissementsPage() {
         </Link>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
-        {tabs.map((tab) => (
+      {/* Toolbar: tabs + view toggle */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                activeTab === tab.value
+                  ? "bg-background shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
           <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
+            onClick={() => setViewMode("list")}
             className={cn(
-              "rounded-md px-4 py-2 text-sm font-medium transition-colors",
-              activeTab === tab.value
+              "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              viewMode === "list"
                 ? "bg-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {tab.label}
+            <List className="h-4 w-4" />
+            Liste
           </button>
-        ))}
+          <button
+            onClick={() => setViewMode("map")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              viewMode === "map"
+                ? "bg-background shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MapIcon className="h-4 w-4" />
+            Carte
+          </button>
+        </div>
       </div>
 
-      {/* Grid */}
+      {/* Content */}
       {isLoading ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-xl border border-border/50 bg-card p-0"
+            >
+              <div className="animate-pulse">
+                <div className="h-40 rounded-t-xl bg-muted/50" />
+                <div className="space-y-3 p-4">
+                  <div className="h-4 w-3/4 rounded bg-muted/50" />
+                  <div className="h-3 w-1/2 rounded bg-muted/30" />
+                  <div className="h-3 w-full rounded bg-muted/30" />
+                  <div className="h-2 w-full rounded-full bg-muted/40" />
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-8 flex-1 rounded-lg bg-muted/40" />
+                    <div className="h-8 flex-1 rounded-lg bg-muted/30" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+      ) : viewMode === "map" ? (
+        <InvestmentMap investments={filtered as any} />
       ) : filtered.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
           <TrendingUp className="h-12 w-12 opacity-20" />
@@ -102,7 +154,7 @@ export default function InvestissementsPage() {
           </p>
           <p className="mt-1 text-sm">
             {activeTab === "all"
-              ? "Les deals appara\u00eetront ici d\u00e8s qu\u2019ils seront publi\u00e9s"
+              ? "Les deals apparaîtront ici dès qu’ils seront publiés"
               : "Aucun deal avec ce statut"}
           </p>
         </div>
@@ -112,6 +164,8 @@ export default function InvestissementsPage() {
             const target = Number(investment.targetAmount || 0);
             const current = Number(investment.currentAmount || 0);
             const progress = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+            const totalInvestors = investment._count?.memberInvestments ?? 0;
+            const investorList = investment.memberInvestments ?? [];
 
             return (
               <div
@@ -179,11 +233,43 @@ export default function InvestissementsPage() {
                     </p>
                   )}
 
-                  {/* Interest count */}
-                  <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                    <Users className="h-3.5 w-3.5" />
-                    {investment._count?.memberInvestments ?? 0} {"int\u00e9ress\u00e9(s)"}
-                  </div>
+                  {/* Co-investment indicator */}
+                  {totalInvestors >= 2 ? (
+                    <div className="mt-3 flex items-center gap-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-2.5 py-2">
+                      <div className="flex -space-x-2">
+                        {investorList.slice(0, 3).map((mi: any) => (
+                          <div
+                            key={mi.id}
+                            className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border-2 border-card bg-muted text-[10px] font-semibold"
+                            title={`${mi.member?.firstName ?? ""} ${mi.member?.lastName ?? ""}`}
+                          >
+                            {mi.member?.avatarUrl ? (
+                              <img
+                                src={mi.member.avatarUrl}
+                                alt=""
+                                className="h-full w-full rounded-full object-cover"
+                              />
+                            ) : (
+                              `${mi.member?.firstName?.[0] ?? "?"}${mi.member?.lastName?.[0] ?? ""}`
+                            )}
+                          </div>
+                        ))}
+                        {totalInvestors > 3 && (
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-card bg-muted text-[10px] font-semibold text-muted-foreground">
+                            +{totalInvestors - 3}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-xs font-medium text-foreground">
+                        {"👥 Co-investissement de "}{totalInvestors}{" membres"}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Users className="h-3.5 w-3.5" />
+                      {totalInvestors} {"intéressé(s)"}
+                    </div>
+                  )}
 
                   {/* CTA */}
                   <div className="mt-4 flex gap-2">
@@ -202,7 +288,7 @@ export default function InvestissementsPage() {
                       href={`/investissements/${investment.id}`}
                       className="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-accent"
                     >
-                      {"D\u00e9tails"}
+                      {"Détails"}
                     </Link>
                   </div>
                 </div>

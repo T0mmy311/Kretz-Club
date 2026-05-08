@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, MapPin, Euro, CalendarPlus, Loader2, Check, CreditCard } from "lucide-react";
+import { Calendar, MapPin, Euro, CalendarPlus, Loader2, Check, CreditCard, List, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
@@ -11,8 +11,93 @@ const tabs = [
   { label: "Pass\u00e9s", value: "past" },
 ];
 
+function MonthCalendar({ events }: { events: any[] }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startWeekday = (firstDay.getDay() + 6) % 7; // Mon = 0
+  const daysInMonth = lastDay.getDate();
+
+  const days: Array<Date | null> = Array(startWeekday).fill(null);
+  for (let d = 1; d <= daysInMonth; d++) days.push(new Date(year, month, d));
+
+  const eventsByDate = new Map<string, any[]>();
+  events.forEach((e) => {
+    const d = new Date(e.startsAt);
+    const key = d.toDateString();
+    if (!eventsByDate.has(key)) eventsByDate.set(key, []);
+    eventsByDate.get(key)!.push(e);
+  });
+
+  const monthName = currentMonth.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const weekdays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <button
+          onClick={() => setCurrentMonth(new Date(year, month - 1))}
+          className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
+          aria-label="Mois pr\u00e9c\u00e9dent"
+        >
+          \u2190
+        </button>
+        <h3 className="text-lg font-semibold capitalize">{monthName}</h3>
+        <button
+          onClick={() => setCurrentMonth(new Date(year, month + 1))}
+          className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
+          aria-label="Mois suivant"
+        >
+          \u2192
+        </button>
+      </div>
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
+        {weekdays.map((d) => (
+          <div
+            key={d}
+            className="bg-card px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+          >
+            {d}
+          </div>
+        ))}
+        {days.map((d, i) => {
+          if (!d) return <div key={i} className="min-h-[96px] bg-card/50" />;
+          const dayEvents = eventsByDate.get(d.toDateString()) ?? [];
+          const isToday = d.toDateString() === new Date().toDateString();
+          return (
+            <div key={i} className="min-h-[96px] bg-card p-2">
+              <div
+                className={cn(
+                  "text-xs font-medium",
+                  isToday ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                {d.getDate()}
+              </div>
+              {dayEvents.map((e) => (
+                <Link
+                  key={e.id}
+                  href={`/evenements/${e.id}`}
+                  className="mt-1 block truncate rounded bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary hover:bg-primary/20"
+                  title={e.title}
+                >
+                  {e.title}
+                </Link>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function EvenementsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [checkoutLoadingId, setCheckoutLoadingId] = useState<string | null>(null);
 
@@ -72,22 +157,51 @@ export default function EvenementsPage() {
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
-        {tabs.map((tab) => (
+      {/* Toolbar: tabs + view toggle */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                activeTab === tab.value
+                  ? "bg-background shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
           <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
+            onClick={() => setViewMode("list")}
             className={cn(
-              "rounded-md px-4 py-2 text-sm font-medium transition-colors",
-              activeTab === tab.value
+              "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              viewMode === "list"
                 ? "bg-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {tab.label}
+            <List className="h-4 w-4" />
+            Liste
           </button>
-        ))}
+          <button
+            onClick={() => setViewMode("calendar")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              viewMode === "calendar"
+                ? "bg-background shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <CalendarDays className="h-4 w-4" />
+            Calendrier
+          </button>
+        </div>
       </div>
 
       {/* Error message */}
@@ -103,10 +217,29 @@ export default function EvenementsPage() {
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="h-72 animate-pulse rounded-xl border bg-muted"
-            />
+              className="overflow-hidden rounded-xl border border-border/50 bg-card"
+            >
+              <div className="animate-pulse">
+                <div className="h-40 rounded-t-xl bg-muted/50" />
+                <div className="space-y-3 p-4">
+                  <div className="h-4 w-3/4 rounded bg-muted/50" />
+                  <div className="h-3 w-full rounded bg-muted/30" />
+                  <div className="space-y-1.5 pt-1">
+                    <div className="h-3 w-2/3 rounded bg-muted/30" />
+                    <div className="h-3 w-1/2 rounded bg-muted/30" />
+                    <div className="h-3 w-1/3 rounded bg-muted/30" />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-9 flex-1 rounded-lg bg-muted/40" />
+                    <div className="h-9 w-10 rounded-lg bg-muted/30" />
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
+      ) : viewMode === "calendar" ? (
+        <MonthCalendar events={events} />
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event: any) => (

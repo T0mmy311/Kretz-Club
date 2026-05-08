@@ -99,9 +99,15 @@ export default function MessageriePage() {
             /* Channels list */
             <div className="space-y-4 p-3">
               {channelsLoading ? (
-                <div className="space-y-2">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-8 animate-pulse rounded-md bg-muted" />
+                <div className="space-y-3">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="mb-2 h-3 w-1/3 rounded bg-muted/40" />
+                      <div className="space-y-1.5">
+                        <div className="h-7 rounded-md bg-muted/50" />
+                        <div className="h-7 w-5/6 rounded-md bg-muted/30" />
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (

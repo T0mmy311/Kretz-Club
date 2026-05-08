@@ -69,6 +69,17 @@ export const memberRouter = router({
       return updated;
     }),
 
+  setTheme: protectedProcedure
+    .input(z.object({ theme: z.enum(["dark", "light"]) }))
+    .mutation(async ({ ctx, input }) => {
+      const updated = await prisma.member.update({
+        where: { id: ctx.member.id },
+        data: { theme: input.theme },
+        select: { id: true, theme: true },
+      });
+      return updated;
+    }),
+
   search: protectedProcedure
     .input(
       z.object({

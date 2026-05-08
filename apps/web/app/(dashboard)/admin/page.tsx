@@ -14,6 +14,7 @@ import {
   ScrollText,
   Plus,
 } from "lucide-react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -314,6 +315,10 @@ function InvitationsTab() {
       setEmail("");
       utils.invitation.list.invalidate();
       utils.audit.list.invalidate();
+      toast.success(`Code créé : ${inv.code}`);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de la création de l'invitation");
     },
   });
 

@@ -27,6 +27,7 @@ model Member {
   linkedinUrl    String?  @map("linkedin_url")
   isAdmin        Boolean  @default(false) @map("is_admin")
   isActive       Boolean  @default(true) @map("is_active")
+  theme          String?  @default("dark")
   joinedAt       DateTime @default(now()) @map("joined_at") @db.Timestamptz
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -237,6 +238,8 @@ model Investment {
   title         String
   description   String?
   location      String?
+  latitude      Float?
+  longitude     Float?
   targetAmount  Decimal?   @map("target_amount") @db.Decimal(12, 2)
   currentAmount Decimal    @default(0) @map("current_amount") @db.Decimal(12, 2)
   minimumTicket Decimal?   @map("minimum_ticket") @db.Decimal(12, 2)

@@ -17,7 +17,9 @@ import {
   Paperclip,
   FileText,
   Download,
+  Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { createClient } from "@/lib/supabase/client";
 
@@ -254,6 +256,33 @@ export default function ChannelPage({
   const [isUploading, setIsUploading] = useState(false);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryText, setSummaryText] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [summaryMessageCount, setSummaryMessageCount] = useState<number | null>(null);
+
+  const fetchSummary = async () => {
+    setSummaryOpen(true);
+    setSummaryLoading(true);
+    setSummaryError(null);
+    setSummaryText(null);
+    try {
+      const res = await fetch(`/api/channel/${channelId}/summary`);
+      const json = await res.json();
+      if (!res.ok) {
+        setSummaryError(json.error || "Erreur lors de la génération du résumé");
+      } else {
+        setSummaryText(json.summary || "");
+        setSummaryMessageCount(json.messageCount ?? null);
+      }
+    } catch (err) {
+      console.error(err);
+      setSummaryError("Erreur réseau");
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -301,6 +330,7 @@ export default function ChannelPage({
           });
         } catch (err) {
           console.error("Attachment upload failed:", err);
+          toast.error("Erreur lors de l'envoi du fichier");
         } finally {
           setSelectedFile(null);
           setIsUploading(false);
@@ -308,6 +338,9 @@ export default function ChannelPage({
       }
 
       refetch();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de l'envoi du message");
     },
   });
 
@@ -317,12 +350,18 @@ export default function ChannelPage({
       setContent("");
       refetch();
     },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de la modification");
+    },
   });
 
   const deleteMessage = trpc.message.delete.useMutation({
     onSuccess: () => {
       setConfirmDeleteId(null);
       refetch();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de la suppression");
     },
   });
 
@@ -542,6 +581,19 @@ export default function ChannelPage({
         </Link>
         <Hash className="h-5 w-5 text-muted-foreground" />
         <h2 className="font-semibold">{ch?.displayName ?? "Channel"}</h2>
+        <button
+          onClick={fetchSummary}
+          disabled={summaryLoading}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs font-medium text-yellow-600 transition-colors hover:bg-yellow-500/20 disabled:opacity-50"
+          title="Générer un résumé IA des derniers messages"
+        >
+          {summaryLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          {"Résumé IA"}
+        </button>
       </div>
 
       {/* Messages */}
@@ -874,6 +926,55 @@ export default function ChannelPage({
                 <Send className="h-4 w-4" />
               )}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Summary modal */}
+      {summaryOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setSummaryOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSummaryOpen(false)}
+              className="absolute right-3 top-3 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white/80"
+              aria-label="Fermer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-yellow-500/15">
+                <Sparkles className="h-4 w-4 text-yellow-500" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Résumé IA</h3>
+                {summaryMessageCount !== null && !summaryLoading && !summaryError && (
+                  <p className="text-xs text-muted-foreground">
+                    Basé sur les {summaryMessageCount} derniers messages
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {summaryLoading ? (
+              <div className="flex items-center gap-3 py-8 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Génération du résumé en cours…
+              </div>
+            ) : summaryError ? (
+              <div className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-3 text-sm text-red-400">
+                {summaryError}
+              </div>
+            ) : summaryText ? (
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                {summaryText}
+              </div>
+            ) : null}
           </div>
         </div>
       )}
