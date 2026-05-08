@@ -50,23 +50,23 @@ export default function PWAInstallPrompt() {
   if (!visible) return null;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.04] px-4 py-2.5">
+    <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/30 px-4 py-2.5">
       <div className="flex items-center gap-2.5 min-w-0">
-        <Download className="h-4 w-4 shrink-0 text-white/50" />
-        <span className="truncate text-[13px] text-white/80">
+        <Download className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <span className="truncate text-[13px] text-foreground/80">
           Installer Kretz Club
         </span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={handleInstall}
-          className="rounded-md bg-white/[0.08] px-3 py-1 text-[12px] font-medium text-white/90 transition-colors hover:bg-white/[0.12]"
+          className="rounded-md bg-muted px-3 py-1 text-[12px] font-medium text-foreground/90 transition-colors hover:bg-accent"
         >
           Installer
         </button>
         <button
           onClick={handleDismiss}
-          className="rounded-md p-1 text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/50"
+          className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-muted/50 hover:text-muted-foreground"
         >
           <X className="h-3.5 w-3.5" />
         </button>

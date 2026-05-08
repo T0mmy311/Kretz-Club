@@ -43,8 +43,8 @@ export default function ChartePage() {
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-10 flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03]">
-            <ScrollText className="h-5 w-5 text-white/70" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-card">
+            <ScrollText className="h-5 w-5 text-muted-foreground" />
           </div>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -57,7 +57,7 @@ export default function ChartePage() {
         </div>
 
         {/* Section 1 - Bienvenue */}
-        <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-base font-semibold text-foreground">
             Bienvenue au Kretz Club
           </h2>
@@ -70,7 +70,7 @@ export default function ChartePage() {
           </p>
         </section>
 
-        <div className="my-8 h-px bg-white/[0.06]" />
+        <div className="my-8 h-px bg-border" />
 
         {/* Section 2 - Nos valeurs */}
         <section>
@@ -81,10 +81,10 @@ export default function ChartePage() {
             {valeurs.map((v) => (
               <div
                 key={v.title}
-                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                className="flex items-start gap-3 rounded-xl border border-border bg-card p-4"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03]">
-                  <v.icon className="h-[18px] w-[18px] text-white/70" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/30">
+                  <v.icon className="h-[18px] w-[18px] text-muted-foreground" />
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-foreground">
@@ -99,7 +99,7 @@ export default function ChartePage() {
           </div>
         </section>
 
-        <div className="my-8 h-px bg-white/[0.06]" />
+        <div className="my-8 h-px bg-border" />
 
         {/* Section 3 - Règles */}
         <section>
@@ -110,9 +110,9 @@ export default function ChartePage() {
             {regles.map((regle, i) => (
               <li
                 key={i}
-                className="flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                className="flex items-start gap-4 rounded-xl border border-border bg-card p-4"
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.08] text-[12px] font-semibold text-foreground/80">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-[12px] font-semibold text-foreground/80">
                   {i + 1}
                 </span>
                 <p className="pt-0.5 text-[13.5px] leading-relaxed text-muted-foreground">
@@ -123,10 +123,10 @@ export default function ChartePage() {
           </ol>
         </section>
 
-        <div className="my-8 h-px bg-white/[0.06]" />
+        <div className="my-8 h-px bg-border" />
 
         {/* Section 4 - Confidentialité */}
-        <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-base font-semibold text-foreground">
             Confidentialité
           </h2>
@@ -142,10 +142,10 @@ export default function ChartePage() {
           </p>
         </section>
 
-        <div className="my-8 h-px bg-white/[0.06]" />
+        <div className="my-8 h-px bg-border" />
 
         {/* Section 5 - Modération */}
-        <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-base font-semibold text-foreground">
             Modération
           </h2>

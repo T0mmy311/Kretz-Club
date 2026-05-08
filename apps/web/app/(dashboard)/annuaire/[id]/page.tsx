@@ -39,17 +39,17 @@ export default function MemberDetailPage() {
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-white/40" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/80" />
       </div>
     );
   }
 
   if (!member) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center text-white/40">
+      <div className="flex h-96 flex-col items-center justify-center text-muted-foreground/80">
         <User className="h-12 w-12 opacity-20" />
         <p className="mt-4 text-lg font-medium">Membre introuvable</p>
-        <Link href="/annuaire" className="mt-4 text-sm text-white/60 hover:text-white transition-colors">
+        <Link href="/annuaire" className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
           {"Retour \u00e0 l'annuaire"}
         </Link>
       </div>
@@ -63,7 +63,7 @@ export default function MemberDetailPage() {
       {/* Back button */}
       <Link
         href="/annuaire"
-        className="mb-6 inline-flex items-center gap-2 text-[13px] text-white/40 hover:text-white transition-colors"
+        className="mb-6 inline-flex items-center gap-2 text-[13px] text-muted-foreground/80 hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         {"Retour \u00e0 l'annuaire"}
@@ -86,19 +86,19 @@ export default function MemberDetailPage() {
           )}
 
           {/* Name */}
-          <h1 className="mt-4 text-2xl font-bold text-white">
+          <h1 className="mt-4 text-2xl font-bold text-foreground">
             {member.firstName} {member.lastName}
           </h1>
 
           {/* Profession & Company */}
           {member.profession && (
-            <p className="mt-2 flex items-center gap-1.5 text-[14px] text-white/60">
+            <p className="mt-2 flex items-center gap-1.5 text-[14px] text-muted-foreground">
               <Briefcase className="h-4 w-4" />
               {member.profession}
             </p>
           )}
           {member.company && (
-            <p className="mt-1 flex items-center gap-1.5 text-[14px] text-white/40">
+            <p className="mt-1 flex items-center gap-1.5 text-[14px] text-muted-foreground/80">
               <Building2 className="h-4 w-4" />
               {member.company}
             </p>
@@ -106,7 +106,7 @@ export default function MemberDetailPage() {
 
           {/* City */}
           {member.city && (
-            <p className="mt-1 flex items-center gap-1.5 text-[14px] text-white/40">
+            <p className="mt-1 flex items-center gap-1.5 text-[14px] text-muted-foreground/80">
               <MapPin className="h-4 w-4" />
               {member.city}
             </p>
@@ -114,7 +114,7 @@ export default function MemberDetailPage() {
 
           {/* Joined date */}
           {member.joinedAt && (
-            <p className="mt-2 flex items-center gap-1.5 text-[13px] text-white/30">
+            <p className="mt-2 flex items-center gap-1.5 text-[13px] text-muted-foreground/60">
               <Calendar className="h-3.5 w-3.5" />
               {"Membre depuis "}
               {new Date(member.joinedAt).toLocaleDateString("fr-FR", {
@@ -127,23 +127,23 @@ export default function MemberDetailPage() {
 
         {/* Bio */}
         {member.bio && (
-          <div className="mt-8 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
-            <h2 className="mb-3 text-[12px] font-medium uppercase tracking-wider text-white/40">Bio</h2>
-            <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/80">{member.bio}</p>
+          <div className="mt-8 rounded-xl border border-border bg-card p-6">
+            <h2 className="mb-3 text-[12px] font-medium uppercase tracking-wider text-muted-foreground/80">Bio</h2>
+            <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-foreground/80">{member.bio}</p>
           </div>
         )}
 
         {/* Contact info */}
         {(member.linkedinUrl || member.phone) && (
-          <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
-            <h2 className="mb-3 text-[12px] font-medium uppercase tracking-wider text-white/40">Contact</h2>
+          <div className="mt-4 rounded-xl border border-border bg-card p-6">
+            <h2 className="mb-3 text-[12px] font-medium uppercase tracking-wider text-muted-foreground/80">Contact</h2>
             <div className="space-y-3">
               {member.linkedinUrl && (
                 <a
                   href={member.linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[14px] text-white/60 hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ExternalLink className="h-4 w-4" />
                   LinkedIn
@@ -152,7 +152,7 @@ export default function MemberDetailPage() {
               {member.phone && (
                 <a
                   href={`tel:${member.phone}`}
-                  className="flex items-center gap-2 text-[14px] text-white/60 hover:text-white transition-colors"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <Phone className="h-4 w-4" />
                   {member.phone}
@@ -190,14 +190,14 @@ export default function MemberDetailPage() {
         {/* Recommendations */}
         {member.receivedRecommendations && member.receivedRecommendations.length > 0 && (
           <div className="mt-8">
-            <h2 className="mb-4 text-[12px] font-medium uppercase tracking-wider text-white/40">
+            <h2 className="mb-4 text-[12px] font-medium uppercase tracking-wider text-muted-foreground/80">
               Recommandations ({member.receivedRecommendations.length})
             </h2>
             <div className="space-y-4">
               {member.receivedRecommendations.map((rec: any) => (
                 <div
                   key={rec.id}
-                  className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5"
+                  className="rounded-xl border border-border bg-card p-5"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     {rec.fromMember.avatarUrl ? (
@@ -212,16 +212,16 @@ export default function MemberDetailPage() {
                       </div>
                     )}
                     <div>
-                      <p className="text-[13px] font-medium text-white">
+                      <p className="text-[13px] font-medium text-foreground">
                         {rec.fromMember.firstName} {rec.fromMember.lastName}
                       </p>
                       {rec.fromMember.profession && (
-                        <p className="text-[12px] text-white/40">{rec.fromMember.profession}</p>
+                        <p className="text-[12px] text-muted-foreground/80">{rec.fromMember.profession}</p>
                       )}
                     </div>
                     <Star className="ml-auto h-4 w-4 text-amber-400" />
                   </div>
-                  <p className="text-[14px] leading-relaxed text-white/70">{rec.content}</p>
+                  <p className="text-[14px] leading-relaxed text-foreground/70">{rec.content}</p>
                 </div>
               ))}
             </div>

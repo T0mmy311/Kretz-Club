@@ -90,11 +90,11 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen flex-col lg:flex-row">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-60 flex-col border-r border-white/[0.06] bg-[hsl(0,0%,4%)]">
+      <aside className="hidden lg:flex w-60 flex-col border-r border-border bg-card">
         {/* Logo */}
         <div className="flex h-14 items-center gap-3 px-5">
           <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-7 w-7 opacity-90" />
-          <span className="text-[15px] font-semibold tracking-tight text-white/90">Kretz Club</span>
+          <span className="text-[15px] font-semibold tracking-tight text-foreground/90">Kretz Club</span>
         </div>
 
         {/* Navigation */}
@@ -110,11 +110,11 @@ export default function DashboardLayout({
                   className={cn(
                     "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
                     isActive
-                      ? "bg-white/[0.08] text-white"
-                      : "text-white/40 hover:bg-white/[0.04] hover:text-white/70"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground/80 hover:bg-muted/30 hover:text-foreground/70"
                   )}
                 >
-                  <item.icon className={cn("h-[18px] w-[18px]", isActive ? "text-white/80" : "text-white/30")} />
+                  <item.icon className={cn("h-[18px] w-[18px]", isActive ? "text-foreground/80" : "text-muted-foreground/60")} />
                   {item.name}
                   {badge > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
@@ -128,18 +128,18 @@ export default function DashboardLayout({
         </nav>
 
         {/* User */}
-        <div className="border-t border-white/[0.06] p-3">
-          <Link href="/profil" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-white/[0.04] transition-colors">
+        <div className="border-t border-border p-3">
+          <Link href="/profil" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-muted/30 transition-colors">
             {memberAvatarUrl ? (
               <img src={memberAvatarUrl} alt="" className="h-8 w-8 rounded-full object-cover" />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/70">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
                 {getInitials(user?.name)}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="truncate text-[13px] font-medium text-white/80">{user?.name || "..."}</p>
-              <p className="truncate text-[11px] text-white/30">{user?.email}</p>
+              <p className="truncate text-[13px] font-medium text-foreground/80">{user?.name || "..."}</p>
+              <p className="truncate text-[11px] text-muted-foreground/60">{user?.email}</p>
             </div>
           </Link>
           <Link
@@ -147,8 +147,8 @@ export default function DashboardLayout({
             className={cn(
               "mt-0.5 flex items-center gap-3 rounded-md px-3 py-2 text-[13px] transition-colors",
               pathname.startsWith("/charte")
-                ? "bg-white/[0.06] text-white/80"
-                : "text-white/30 hover:bg-white/[0.04] hover:text-white/50"
+                ? "bg-muted/50 text-foreground/80"
+                : "text-muted-foreground/60 hover:bg-muted/30 hover:text-muted-foreground"
             )}
           >
             <ScrollText className="h-[16px] w-[16px]" />
@@ -157,7 +157,7 @@ export default function DashboardLayout({
           <div className="mt-0.5 flex items-center gap-1">
             <button
               onClick={handleSignOut}
-              className="flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-[13px] text-white/30 hover:bg-white/[0.04] hover:text-white/50 transition-colors"
+              className="flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-[13px] text-muted-foreground/60 hover:bg-muted/30 hover:text-muted-foreground transition-colors"
             >
               <LogOut className="h-[16px] w-[16px]" />
               {"Se d\u00e9connecter"}
@@ -168,14 +168,14 @@ export default function DashboardLayout({
       </aside>
 
       {/* Mobile Header */}
-      <header className="flex lg:hidden items-center justify-between border-b border-white/[0.06] bg-[hsl(0,0%,4%)] px-4 py-3">
+      <header className="flex lg:hidden items-center justify-between border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-2.5">
           <img src="/logo-kretz-club.svg" alt="Kretz Club" className="h-6 w-6 opacity-90" />
-          <span className="text-[15px] font-semibold text-white/90">Kretz Club</span>
+          <span className="text-[15px] font-semibold text-foreground/90">Kretz Club</span>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/70 overflow-hidden">
+          <Link href="/profil" className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground overflow-hidden">
             {memberAvatarUrl ? (
               <img src={memberAvatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
             ) : (
@@ -192,7 +192,7 @@ export default function DashboardLayout({
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-white/[0.06] bg-[hsl(0,0%,4%)]/95 backdrop-blur-xl safe-area-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-border bg-card/95 backdrop-blur-xl safe-area-bottom">
         {mobileNav.map((item) => {
           if (item.name === "Plus") {
             return (
@@ -201,7 +201,7 @@ export default function DashboardLayout({
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className={cn(
                   "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors",
-                  mobileMenuOpen ? "text-white" : "text-white/30"
+                  mobileMenuOpen ? "text-foreground" : "text-muted-foreground/60"
                 )}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -217,7 +217,7 @@ export default function DashboardLayout({
               href={item.href}
               className={cn(
                 "relative flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] transition-colors",
-                isActive ? "text-white" : "text-white/30"
+                isActive ? "text-foreground" : "text-muted-foreground/60"
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -236,7 +236,7 @@ export default function DashboardLayout({
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute bottom-16 left-0 right-0 rounded-t-2xl border-t border-white/[0.06] bg-[hsl(0,0%,5%)] p-4 safe-area-bottom animate-fade-in">
+          <div className="absolute bottom-16 left-0 right-0 rounded-t-2xl border-t border-border bg-card p-4 safe-area-bottom animate-fade-in">
             <div className="mb-4 grid grid-cols-3 gap-2.5">
               {[
                 { name: "Galerie", href: "/galerie", icon: Image },
@@ -249,18 +249,18 @@ export default function DashboardLayout({
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border border-white/[0.06] p-4 text-sm transition-colors hover:bg-white/[0.04]",
-                    pathname.startsWith(item.href) && "border-white/[0.12] bg-white/[0.04]"
+                    "flex flex-col items-center gap-2 rounded-xl border border-border p-4 text-sm transition-colors hover:bg-muted/30",
+                    pathname.startsWith(item.href) && "border-accent bg-muted/30"
                   )}
                 >
-                  <item.icon className="h-5 w-5 text-white/50" />
-                  <span className="text-[11px] font-medium text-white/60">{item.name}</span>
+                  <item.icon className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-[11px] font-medium text-muted-foreground">{item.name}</span>
                 </Link>
               ))}
             </div>
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.06] py-3 text-[13px] font-medium text-white/40 hover:bg-white/[0.04] transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-[13px] font-medium text-muted-foreground/80 hover:bg-muted/30 transition-colors"
             >
               <LogOut className="h-4 w-4" />
               {"Se d\u00e9connecter"}

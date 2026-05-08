@@ -122,13 +122,13 @@ function EmojiPicker({
   return (
     <div
       ref={ref}
-      className="absolute bottom-full right-0 z-50 mb-1 flex gap-1 rounded-lg border border-white/10 bg-zinc-900 p-1.5 shadow-lg"
+      className="absolute bottom-full right-0 z-50 mb-1 flex gap-1 rounded-lg border border-border bg-card p-1.5 shadow-lg"
     >
       {EMOJI_LIST.map((e) => (
         <button
           key={e}
           onClick={() => onSelect(e)}
-          className="rounded p-1 text-base hover:bg-white/10"
+          className="rounded p-1 text-base hover:bg-muted/60"
         >
           {e}
         </button>
@@ -165,7 +165,7 @@ function ReactionPills({
           className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs transition-colors ${
             mine
               ? "border-primary/40 bg-primary/10 text-primary"
-              : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+              : "border-border bg-muted/30 text-muted-foreground hover:bg-muted/60"
           }`}
         >
           <span>{emoji}</span>
@@ -190,18 +190,18 @@ function MessageActions({
   onReaction: () => void;
 }) {
   return (
-    <div className="absolute -top-3 right-2 z-10 hidden gap-0.5 rounded-md border border-white/10 bg-zinc-900 p-0.5 shadow-md group-hover:flex">
+    <div className="absolute -top-3 right-2 z-10 hidden gap-0.5 rounded-md border border-border bg-card p-0.5 shadow-md group-hover:flex">
       <button
         onClick={onReply}
         title="R\u00e9pondre"
-        className="rounded p-1 text-white/30 transition-colors hover:text-white/60"
+        className="rounded p-1 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
       >
         <Reply className="h-3.5 w-3.5" />
       </button>
       <button
         onClick={onReaction}
         title="R\u00e9action"
-        className="rounded p-1 text-white/30 transition-colors hover:text-white/60"
+        className="rounded p-1 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
       >
         <SmilePlus className="h-3.5 w-3.5" />
       </button>
@@ -210,14 +210,14 @@ function MessageActions({
           <button
             onClick={onEdit}
             title="Modifier"
-            className="rounded p-1 text-white/30 transition-colors hover:text-white/60"
+            className="rounded p-1 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={onDelete}
             title="Supprimer"
-            className="rounded p-1 text-white/30 transition-colors hover:text-white/60"
+            className="rounded p-1 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -762,7 +762,7 @@ export default function ChannelPage({
                       {/* Delete confirmation dialog */}
                       {confirmDeleteId === msg.id && (
                         <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-zinc-900 px-4 py-3 shadow-lg">
+                          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-lg">
                             <span className="text-sm">
                               Supprimer ce message ?
                             </span>
@@ -781,7 +781,7 @@ export default function ChannelPage({
                             </button>
                             <button
                               onClick={() => setConfirmDeleteId(null)}
-                              className="rounded-md px-3 py-1 text-xs text-white/60 hover:text-white/80"
+                              className="rounded-md px-3 py-1 text-xs text-muted-foreground hover:text-foreground/80"
                             >
                               Annuler
                             </button>
@@ -814,7 +814,7 @@ export default function ChannelPage({
         <div className="border-t p-4">
           {/* Reply bar */}
           {replyTo && (
-            <div className="mb-2 flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs">
+            <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs">
               <Reply className="h-3 w-3 shrink-0 text-muted-foreground" />
               <span className="truncate text-muted-foreground">
                 {"R\u00e9ponse \u00e0 "}
@@ -826,7 +826,7 @@ export default function ChannelPage({
               </span>
               <button
                 onClick={() => setReplyTo(null)}
-                className="ml-auto shrink-0 text-white/40 hover:text-white/70"
+                className="ml-auto shrink-0 text-muted-foreground/80 hover:text-foreground/70"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -845,7 +845,7 @@ export default function ChannelPage({
                   setEditingMessage(null);
                   setContent("");
                 }}
-                className="ml-auto shrink-0 text-white/40 hover:text-white/70"
+                className="ml-auto shrink-0 text-muted-foreground/80 hover:text-foreground/70"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -937,12 +937,12 @@ export default function ChannelPage({
           onClick={() => setSummaryOpen(false)}
         >
           <div
-            className="relative w-full max-w-lg rounded-xl border border-white/10 bg-zinc-900 p-6 shadow-2xl"
+            className="relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setSummaryOpen(false)}
-              className="absolute right-3 top-3 rounded-md p-1 text-white/40 hover:bg-white/10 hover:text-white/80"
+              className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground/80"
               aria-label="Fermer"
             >
               <X className="h-5 w-5" />

@@ -81,9 +81,9 @@ export default function StatusPicker({
   return (
     <div
       ref={ref}
-      className="absolute bottom-full left-0 mb-2 w-72 rounded-lg border border-white/[0.08] bg-[hsl(0,0%,6%)] p-4 shadow-xl animate-fade-in z-50"
+      className="absolute bottom-full left-0 mb-2 w-72 rounded-lg border border-border bg-card p-4 shadow-xl animate-fade-in z-50"
     >
-      <p className="mb-3 text-[13px] font-medium text-white/70">
+      <p className="mb-3 text-[13px] font-medium text-foreground/70">
         Définir un statut
       </p>
 
@@ -95,8 +95,8 @@ export default function StatusPicker({
             onClick={() => setEmoji(emoji === e ? undefined : e)}
             className={`flex h-9 w-9 items-center justify-center rounded-md text-lg transition-colors ${
               emoji === e
-                ? "bg-white/[0.12] ring-1 ring-white/20"
-                : "hover:bg-white/[0.06]"
+                ? "bg-accent ring-1 ring-border"
+                : "hover:bg-muted/50"
             }`}
           >
             {e}
@@ -113,7 +113,7 @@ export default function StatusPicker({
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         maxLength={100}
-        className="mb-3 w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-[13px] text-white/90 placeholder:text-white/25 outline-none focus:border-white/[0.15] transition-colors"
+        className="mb-3 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-[13px] text-foreground/90 placeholder:text-muted-foreground/60 outline-none focus:border-border transition-colors"
       />
 
       {/* Actions */}
@@ -121,14 +121,14 @@ export default function StatusPicker({
         <button
           onClick={handleSave}
           disabled={setStatus.isPending}
-          className="flex-1 rounded-md bg-white/[0.08] px-3 py-1.5 text-[12px] font-medium text-white/70 hover:bg-white/[0.12] transition-colors disabled:opacity-50"
+          className="flex-1 rounded-md bg-muted px-3 py-1.5 text-[12px] font-medium text-foreground/70 hover:bg-accent transition-colors disabled:opacity-50"
         >
           Enregistrer
         </button>
         <button
           onClick={handleClear}
           disabled={clearStatus.isPending}
-          className="rounded-md px-3 py-1.5 text-[12px] text-white/30 hover:bg-white/[0.04] hover:text-white/50 transition-colors disabled:opacity-50"
+          className="rounded-md px-3 py-1.5 text-[12px] text-muted-foreground/60 hover:bg-muted/50 hover:text-muted-foreground transition-colors disabled:opacity-50"
         >
           Effacer le statut
         </button>

@@ -123,7 +123,7 @@ export default function SearchPalette() {
     return (
       <>
         {before}
-        <mark className="rounded bg-yellow-500/30 px-0.5 text-white/95">{match}</mark>
+        <mark className="rounded bg-yellow-500/30 px-0.5 text-foreground">{match}</mark>
         {after}
       </>
     );
@@ -148,21 +148,21 @@ export default function SearchPalette() {
       />
 
       {/* Palette */}
-      <div className="relative w-full max-w-lg rounded-xl border border-white/[0.08] bg-[hsl(0,0%,6%)] shadow-2xl">
+      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card shadow-2xl">
         {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-white/[0.08] px-4 py-3">
-          <Search className="h-5 w-5 text-white/30" />
+        <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+          <Search className="h-5 w-5 text-muted-foreground/60" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher membres, channels, investissements..."
-            className="flex-1 bg-transparent text-sm text-white/90 placeholder:text-white/30 outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground/90 placeholder:text-muted-foreground/60 outline-none"
           />
           <button
             onClick={() => setOpen(false)}
-            className="flex items-center gap-1 rounded-md border border-white/[0.08] px-1.5 py-0.5 text-[10px] text-white/30 hover:text-white/50 transition-colors"
+            className="flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
           >
             <span>ESC</span>
           </button>
@@ -171,13 +171,13 @@ export default function SearchPalette() {
         {/* Results */}
         <div className="max-h-[50vh] overflow-y-auto p-2">
           {!enabled && (
-            <div className="px-3 py-8 text-center text-sm text-white/20">
+            <div className="px-3 py-8 text-center text-sm text-muted-foreground/40">
               {"Tapez au moins 2 caract\u00e8res pour rechercher"}
             </div>
           )}
 
           {enabled && !hasResults && (
-            <div className="px-3 py-8 text-center text-sm text-white/20">
+            <div className="px-3 py-8 text-center text-sm text-muted-foreground/40">
               {"Aucun r\u00e9sultat pour \u00ab\u202f"}{debouncedQuery}{"\u202f\u00bb"}
             </div>
           )}
@@ -185,7 +185,7 @@ export default function SearchPalette() {
           {/* Members */}
           {members.length > 0 && (
             <div className="mb-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                 <Users className="h-3.5 w-3.5" />
                 Membres
               </div>
@@ -193,16 +193,16 @@ export default function SearchPalette() {
                 <button
                   key={member.id}
                   onClick={() => navigate(`/annuaire`)}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/70">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
                     {(member.firstName?.[0] ?? "")}{(member.lastName?.[0] ?? "")}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="truncate font-medium">
                       {member.firstName} {member.lastName}
                     </p>
-                    <p className="truncate text-xs text-white/30">
+                    <p className="truncate text-xs text-muted-foreground/60">
                       {[member.profession, member.company]
                         .filter(Boolean)
                         .join(" - ")}
@@ -216,7 +216,7 @@ export default function SearchPalette() {
           {/* Channels */}
           {filteredChannels.length > 0 && (
             <div className="mb-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                 <MessageSquare className="h-3.5 w-3.5" />
                 Channels
               </div>
@@ -224,15 +224,15 @@ export default function SearchPalette() {
                 <button
                   key={channel.id}
                   onClick={() => navigate(`/messagerie`)}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/50">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
                     #
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="truncate font-medium">{channel.displayName}</p>
                     {channel.description && (
-                      <p className="truncate text-xs text-white/30">
+                      <p className="truncate text-xs text-muted-foreground/60">
                         {channel.description}
                       </p>
                     )}
@@ -245,7 +245,7 @@ export default function SearchPalette() {
           {/* Messages */}
           {messages.length > 0 && (
             <div className="mb-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                 <MessageSquare className="h-3.5 w-3.5" />
                 Messages
               </div>
@@ -267,14 +267,14 @@ export default function SearchPalette() {
                   <button
                     key={msg.id}
                     onClick={() => navigate(href)}
-                    className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
+                    className="flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted/50 transition-colors"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white/50">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
                       <MessageSquare className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 text-xs text-white/40">
-                        <span className="truncate font-medium text-white/70">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+                        <span className="truncate font-medium text-foreground/70">
                           {authorName || "Membre"}
                         </span>
                         <span className="truncate">dans {contextLabel}</span>
@@ -282,7 +282,7 @@ export default function SearchPalette() {
                           {formatMessageDate(msg.createdAt)}
                         </span>
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-[13px] text-white/80">
+                      <p className="mt-0.5 line-clamp-2 text-[13px] text-foreground/80">
                         {renderHighlighted(msg.content ?? "", debouncedQuery)}
                       </p>
                     </div>
@@ -295,7 +295,7 @@ export default function SearchPalette() {
           {/* Investments */}
           {filteredInvestments.length > 0 && (
             <div className="mb-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
+              <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
                 <TrendingUp className="h-3.5 w-3.5" />
                 Investissements
               </div>
@@ -303,14 +303,14 @@ export default function SearchPalette() {
                 <button
                   key={inv.id}
                   onClick={() => navigate(`/investissements/${inv.id}`)}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-foreground/80 hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-                    <TrendingUp className="h-4 w-4 text-white/50" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="truncate font-medium">{inv.title}</p>
-                    <p className="truncate text-xs text-white/30">
+                    <p className="truncate text-xs text-muted-foreground/60">
                       {inv.status} {inv.location ? `- ${inv.location}` : ""}
                     </p>
                   </div>
@@ -321,12 +321,12 @@ export default function SearchPalette() {
         </div>
 
         {/* Footer hint */}
-        <div className="border-t border-white/[0.08] px-4 py-2 text-[11px] text-white/20">
-          <kbd className="rounded border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px]">
+        <div className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground/40">
+          <kbd className="rounded border border-border bg-muted/30 px-1.5 py-0.5 font-mono text-[10px]">
             Cmd
           </kbd>{" "}
           +{" "}
-          <kbd className="rounded border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px]">
+          <kbd className="rounded border border-border bg-muted/30 px-1.5 py-0.5 font-mono text-[10px]">
             K
           </kbd>{" "}
           pour ouvrir
