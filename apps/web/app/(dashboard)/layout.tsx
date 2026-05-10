@@ -15,8 +15,13 @@ import {
   X,
   ScrollText,
   Shield,
+  HandHeart,
+  GraduationCap,
+  Video,
+  BookOpen,
 } from "lucide-react";
 import { Toaster } from "sonner";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import SearchPalette from "@/components/SearchPalette";
@@ -29,23 +34,6 @@ import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { useUnreadCounts } from "@/hooks/useUnreadCounts";
 import { trpc } from "@/lib/trpc/client";
 
-const navigation = [
-  { name: "Messagerie", href: "/messagerie", icon: MessageSquare },
-  { name: "Investissements", href: "/investissements", icon: TrendingUp },
-  { name: "\u00c9v\u00e9nements", href: "/evenements", icon: Calendar },
-  { name: "Annuaire", href: "/annuaire", icon: Users },
-  { name: "Galerie", href: "/galerie", icon: Image },
-  { name: "Factures", href: "/factures", icon: FileText },
-];
-
-const mobileNav = [
-  { name: "Messages", href: "/messagerie", icon: MessageSquare },
-  { name: "Invest.", href: "/investissements", icon: TrendingUp },
-  { name: "Events", href: "/evenements", icon: Calendar },
-  { name: "Annuaire", href: "/annuaire", icon: Users },
-  { name: "Plus", href: "", icon: Menu },
-];
-
 export default function DashboardLayout({
   children,
 }: {
@@ -54,6 +42,28 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const tNav = useTranslations("nav");
+
+  const navigation = [
+    { name: tNav("messagerie"), href: "/messagerie", icon: MessageSquare },
+    { name: tNav("investissements"), href: "/investissements", icon: TrendingUp },
+    { name: tNav("evenements"), href: "/evenements", icon: Calendar },
+    { name: tNav("replays"), href: "/replays", icon: Video },
+    { name: tNav("annuaire"), href: "/annuaire", icon: Users },
+    { name: tNav("mentorat"), href: "/mentorat", icon: GraduationCap },
+    { name: tNav("entraide"), href: "/entraide", icon: HandHeart },
+    { name: tNav("galerie"), href: "/galerie", icon: Image },
+    { name: tNav("bibliotheque"), href: "/bibliotheque", icon: BookOpen },
+    { name: tNav("factures"), href: "/factures", icon: FileText },
+  ];
+
+  const mobileNav = [
+    { name: tNav("messages"), href: "/messagerie", icon: MessageSquare },
+    { name: tNav("investissementsShort"), href: "/investissements", icon: TrendingUp },
+    { name: tNav("events"), href: "/evenements", icon: Calendar },
+    { name: tNav("annuaire"), href: "/annuaire", icon: Users },
+    { name: tNav("more"), href: "", icon: Menu },
+  ];
   const [user, setUser] = useState<{ email?: string; name?: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useServiceWorker();
@@ -140,7 +150,7 @@ export default function DashboardLayout({
                 )}
               >
                 <Shield className={cn("h-[18px] w-[18px]", pathname.startsWith("/admin") ? "text-foreground/80" : "text-amber-400/70")} />
-                Admin
+                {tNav("admin")}
               </Link>
             )}
           </div>
@@ -171,7 +181,7 @@ export default function DashboardLayout({
             )}
           >
             <ScrollText className="h-[16px] w-[16px]" />
-            Charte du club
+            {tNav("charte")}
           </Link>
           <div className="mt-0.5 flex items-center gap-1">
             <button
@@ -179,7 +189,7 @@ export default function DashboardLayout({
               className="flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-[13px] text-muted-foreground/60 hover:bg-muted/30 hover:text-muted-foreground transition-colors"
             >
               <LogOut className="h-[16px] w-[16px]" />
-              {"Se d\u00e9connecter"}
+              {tNav("deconnecter")}
             </button>
             <ThemeToggle />
           </div>
@@ -227,7 +237,7 @@ export default function DashboardLayout({
                 )}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                <span>Plus</span>
+                <span>{tNav("more")}</span>
               </button>
             );
           }
@@ -261,12 +271,16 @@ export default function DashboardLayout({
           <div className="absolute bottom-16 left-0 right-0 rounded-t-2xl border-t border-border bg-card p-4 safe-area-bottom animate-fade-in">
             <div className="mb-4 grid grid-cols-3 gap-2.5">
               {[
-                { name: "Galerie", href: "/galerie", icon: Image },
-                { name: "Factures", href: "/factures", icon: FileText },
-                { name: "Profil", href: "/profil", icon: Users },
-                { name: "Charte", href: "/charte", icon: ScrollText },
+                { name: tNav("replays"), href: "/replays", icon: Video },
+                { name: tNav("mentorat"), href: "/mentorat", icon: GraduationCap },
+                { name: tNav("entraide"), href: "/entraide", icon: HandHeart },
+                { name: tNav("galerie"), href: "/galerie", icon: Image },
+                { name: tNav("bibliotheque"), href: "/bibliotheque", icon: BookOpen },
+                { name: tNav("factures"), href: "/factures", icon: FileText },
+                { name: tNav("profile"), href: "/profil", icon: Users },
+                { name: tNav("charteShort"), href: "/charte", icon: ScrollText },
                 ...(isAdmin
-                  ? [{ name: "Admin", href: "/admin", icon: Shield }]
+                  ? [{ name: tNav("admin"), href: "/admin", icon: Shield }]
                   : []),
               ].map((item) => (
                 <Link
@@ -288,7 +302,7 @@ export default function DashboardLayout({
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-[13px] font-medium text-muted-foreground/80 hover:bg-muted/30 transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              {"Se d\u00e9connecter"}
+              {tNav("deconnecter")}
             </button>
           </div>
         </div>

@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Save, Camera, Loader2, Shield, ShieldCheck, X } from "lucide-react";
+import { Save, Camera, Loader2, Shield, ShieldCheck, X, Globe, ExternalLink, Languages } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc/client";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ProfilPage() {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
+  const tAuth = useTranslations("auth");
   const { data: profile, isLoading } = trpc.member.me.useQuery();
   const utils = trpc.useUtils();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -16,12 +20,48 @@ export default function ProfilPage() {
     onSuccess: () => {
       utils.member.me.invalidate();
       utils.member.list.invalidate();
-      toast.success("Profil mis à jour");
+      toast.success(t("saved"));
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la mise à jour");
+      toast.error(err.message || t("saveError"));
     },
   });
+
+  // Language switching
+  const setLocaleMutation = trpc.member.setLocale.useMutation();
+  const currentLocale = ((profile as any)?.locale as string) || "fr";
+
+  const handleLocaleChange = async (newLocale: "fr" | "en") => {
+    if (newLocale === currentLocale) return;
+    try {
+      await setLocaleMutation.mutateAsync({ locale: newLocale });
+      // Persist in cookie so the request handler sees it on next render
+      document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      toast.success(t("languageUpdated"));
+      // Reload so server components re-render with new locale
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err?.message || t("saveError"));
+    }
+  };
+
+  // Sync cookie from DB on first load (in case user logs in on a new device)
+  useEffect(() => {
+    if (!profile) return;
+    const dbLocale = (profile as any).locale as string | undefined;
+    if (!dbLocale) return;
+    const cookieLocale = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("locale="))
+      ?.split("=")[1];
+    if (cookieLocale && cookieLocale !== dbLocale) {
+      document.cookie = `locale=${dbLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      window.location.reload();
+    } else if (!cookieLocale) {
+      // Set cookie silently without reload to match DB
+      document.cookie = `locale=${dbLocale}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+  }, [profile]);
 
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -187,6 +227,10 @@ export default function ProfilPage() {
     phone: "",
     city: "",
     linkedinUrl: "",
+    instagramUrl: "",
+    twitterUrl: "",
+    websiteUrl: "",
+    facebookUrl: "",
     dateOfBirth: "",
     showBirthday: true,
   });
@@ -197,10 +241,10 @@ export default function ProfilPage() {
   const setTagsMutation = trpc.member.setTags.useMutation({
     onSuccess: () => {
       utils.member.me.invalidate();
-      toast.success("Centres d'intérêt mis à jour");
+      toast.success(t("interestsUpdated"));
     },
     onError: (err) => {
-      toast.error(err.message || "Erreur lors de la mise à jour des tags");
+      toast.error(err.message || t("saveError"));
     },
   });
 
@@ -216,12 +260,16 @@ export default function ProfilPage() {
         phone: p.phone || "",
         city: p.city || "",
         linkedinUrl: p.linkedinUrl || "",
+        instagramUrl: p.instagramUrl || "",
+        twitterUrl: p.twitterUrl || "",
+        websiteUrl: p.websiteUrl || "",
+        facebookUrl: p.facebookUrl || "",
         dateOfBirth: p.dateOfBirth ? new Date(p.dateOfBirth).toISOString().slice(0, 10) : "",
         showBirthday: p.showBirthday !== false,
       });
       setAvatarUrl(p.avatarUrl || null);
       if (Array.isArray(p.tags)) {
-        setSelectedTagIds(p.tags.map((t: any) => t.id));
+        setSelectedTagIds(p.tags.map((tag: any) => tag.id));
       }
     }
   }, [profile]);
@@ -309,9 +357,9 @@ export default function ProfilPage() {
   return (
     <div className="p-4 lg:p-6">
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-foreground">Mon profil</h2>
+        <h2 className="text-xl font-semibold text-foreground">{t("myProfile")}</h2>
         <p className="mt-1 text-[13px] text-muted-foreground">
-          {"Mettez \u00e0 jour vos informations personnelles"}
+          {t("subtitle")}
         </p>
       </div>
 
@@ -346,72 +394,137 @@ export default function ProfilPage() {
             />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-foreground/80">Photo de profil</p>
-            <p className="text-[12px] text-muted-foreground/60">JPG, PNG ou WebP. Max 2MB.</p>
+            <p className="text-[14px] font-medium text-foreground/80">{t("profilePhoto")}</p>
+            <p className="text-[12px] text-muted-foreground/60">{t("photoConstraints")}</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>{"Pr\u00e9nom"}</label>
+              <label className={labelClass}>{t("firstName")}</label>
               <input name="firstName" value={form.firstName} onChange={handleChange} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Nom</label>
+              <label className={labelClass}>{t("lastName")}</label>
               <input name="lastName" value={form.lastName} onChange={handleChange} className={inputClass} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Profession</label>
-              <input name="profession" value={form.profession} onChange={handleChange} placeholder={"D\u00e9veloppeur, Architecte, Avocat..."} className={inputClass} />
+              <label className={labelClass}>{t("profession")}</label>
+              <input name="profession" value={form.profession} onChange={handleChange} placeholder={t("professionPlaceholder")} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Entreprise</label>
+              <label className={labelClass}>{t("company")}</label>
               <input name="company" value={form.company} onChange={handleChange} className={inputClass} />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Ville</label>
-              <input name="city" value={form.city} onChange={handleChange} placeholder="Paris, Lyon, Marseille..." className={inputClass} />
+              <label className={labelClass}>{t("city")}</label>
+              <input name="city" value={form.city} onChange={handleChange} placeholder={t("cityPlaceholder")} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>{"T\u00e9l\u00e9phone"}</label>
+              <label className={labelClass}>{t("phone")}</label>
               <input name="phone" value={form.phone} onChange={handleChange} type="tel" className={inputClass} />
             </div>
           </div>
 
           <div>
-            <label className={labelClass}>Bio</label>
+            <label className={labelClass}>{t("bio")}</label>
             <textarea
               name="bio"
               value={form.bio}
               onChange={handleChange}
               rows={3}
-              placeholder="Quelques mots sur vous..."
+              placeholder={t("bioPlaceholder")}
               className={inputClass}
             />
           </div>
 
-          <div>
-            <label className={labelClass}>LinkedIn</label>
-            <input
-              name="linkedinUrl"
-              value={form.linkedinUrl}
-              onChange={handleChange}
-              type="url"
-              placeholder="https://linkedin.com/in/..."
-              className={inputClass}
-            />
+          {/* Réseaux sociaux */}
+          <div className="border-t border-border pt-5">
+            <h3 className="mb-4 text-[15px] font-semibold text-foreground">{t("socialNetworks")}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className={`${labelClass} flex items-center gap-1.5`}>
+                  <Globe className="h-3.5 w-3.5" />
+                  {t("website")}
+                </label>
+                <input
+                  name="websiteUrl"
+                  value={form.websiteUrl}
+                  onChange={handleChange}
+                  type="url"
+                  placeholder="https://monsite.com"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={`${labelClass} flex items-center gap-1.5`}>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  LinkedIn
+                </label>
+                <input
+                  name="linkedinUrl"
+                  value={form.linkedinUrl}
+                  onChange={handleChange}
+                  type="url"
+                  placeholder="https://linkedin.com/in/..."
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={`${labelClass} flex items-center gap-1.5`}>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Instagram
+                </label>
+                <input
+                  name="instagramUrl"
+                  value={form.instagramUrl}
+                  onChange={handleChange}
+                  type="url"
+                  placeholder="https://instagram.com/..."
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={`${labelClass} flex items-center gap-1.5`}>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  X / Twitter
+                </label>
+                <input
+                  name="twitterUrl"
+                  value={form.twitterUrl}
+                  onChange={handleChange}
+                  type="url"
+                  placeholder="https://x.com/..."
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={`${labelClass} flex items-center gap-1.5`}>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Facebook
+                </label>
+                <input
+                  name="facebookUrl"
+                  value={form.facebookUrl}
+                  onChange={handleChange}
+                  type="url"
+                  placeholder="https://facebook.com/..."
+                  className={inputClass}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>{"Date de naissance"}</label>
+              <label className={labelClass}>{t("dateOfBirth")}</label>
               <input
                 name="dateOfBirth"
                 value={form.dateOfBirth}
@@ -429,7 +542,7 @@ export default function ProfilPage() {
                   onChange={handleChange}
                   className="h-4 w-4 rounded border-border bg-muted/40 accent-amber-500"
                 />
-                {"Afficher mon anniversaire aux autres membres"}
+                {t("showBirthday")}
               </label>
             </div>
           </div>
@@ -443,12 +556,12 @@ export default function ProfilPage() {
               {updateProfile.isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Enregistrement...
+                  {tCommon("saving")}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <Save className="h-3.5 w-3.5" />
-                  Enregistrer
+                  {tCommon("save")}
                 </span>
               )}
             </button>
@@ -459,9 +572,9 @@ export default function ProfilPage() {
         {/* Centres d'intérêt / Tags */}
         <div className="mt-12 border-t border-border pt-8">
           <div className="mb-2">
-            <h3 className="text-[15px] font-semibold text-foreground">{"Centres d'intérêt"}</h3>
+            <h3 className="text-[15px] font-semibold text-foreground">{t("interests")}</h3>
             <p className="mt-1 text-[12px] text-muted-foreground/70">
-              {"Aidez les autres membres à vous trouver. Cliquez pour ajouter ou retirer."}
+              {t("interestsHelp")}
             </p>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -491,9 +604,40 @@ export default function ProfilPage() {
             })}
             {(!allTags || allTags.length === 0) && (
               <p className="text-[12px] text-muted-foreground/60">
-                {"Aucun tag disponible"}
+                {t("noTags")}
               </p>
             )}
+          </div>
+        </div>
+
+        {/* Preferences (language) */}
+        <div className="mt-12 border-t border-border pt-8">
+          <div className="mb-6 flex items-center gap-2">
+            <Languages className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-[15px] font-semibold text-foreground">{t("preferences")}</h3>
+          </div>
+          <div className="rounded-lg border border-border bg-muted/20 p-5">
+            <label className={labelClass}>{t("language")}</label>
+            <div className="mt-3 flex gap-2">
+              {(["fr", "en"] as const).map((loc) => {
+                const isActive = currentLocale === loc;
+                return (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => handleLocaleChange(loc)}
+                    disabled={setLocaleMutation.isPending}
+                    className={`rounded-md border px-4 py-2 text-[13px] font-medium transition-colors ${
+                      isActive
+                        ? "border-foreground/30 bg-foreground/10 text-foreground"
+                        : "border-border bg-card text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                    } disabled:opacity-50`}
+                  >
+                    {loc === "fr" ? t("french") : t("english")}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -502,17 +646,17 @@ export default function ProfilPage() {
           <div className="mt-12 border-t border-border pt-8">
             <div className="mb-6 flex items-center gap-2">
               <Shield className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-[15px] font-semibold text-foreground">{"S\u00e9curit\u00e9"}</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">{t("security")}</h3>
             </div>
 
             <div className="rounded-lg border border-border bg-muted/20 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[14px] font-medium text-foreground/90">
-                    {"Authentification \u00e0 deux facteurs (2FA)"}
+                    {t("twoFactor")}
                   </p>
                   <p className="mt-1 text-[12px] text-muted-foreground/70">
-                    {"Ajoute une couche de s\u00e9curit\u00e9 \u00e0 votre compte avec une application d'authentification."}
+                    {t("twoFactorHelp")}
                   </p>
                   <div className="mt-3 flex items-center gap-2">
                     {mfaLoading ? (
@@ -520,11 +664,11 @@ export default function ProfilPage() {
                     ) : has2FA ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-0.5 text-[11px] font-medium text-green-400">
                         <ShieldCheck className="h-3 w-3" />
-                        {"Activ\u00e9"}
+                        {t("enabled")}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                        {"Non activ\u00e9"}
+                        {t("notEnabled")}
                       </span>
                     )}
                   </div>
@@ -536,7 +680,7 @@ export default function ProfilPage() {
                     onClick={handleEnable2FA}
                     className="shrink-0 rounded-md bg-white px-4 py-2 text-[13px] font-semibold text-black hover:bg-white/90 transition-colors"
                   >
-                    {"Activer le 2FA"}
+                    {t("enable2FA")}
                   </button>
                 )}
 
@@ -546,7 +690,7 @@ export default function ProfilPage() {
                     onClick={() => setShowDisableConfirm(true)}
                     className="shrink-0 rounded-md border border-border bg-muted/30 px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
                   >
-                    {"D\u00e9sactiver le 2FA"}
+                    {t("disable2FA")}
                   </button>
                 )}
               </div>
@@ -557,17 +701,17 @@ export default function ProfilPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[13px] font-medium text-foreground/90">
-                        {"Scannez le QR code avec votre application"}
+                        {t("scanQR")}
                       </p>
                       <p className="mt-1 text-[12px] text-muted-foreground/60">
-                        {"Google Authenticator, Authy, 1Password..."}
+                        {t("authApps")}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={handleCancelEnroll}
                       className="rounded-md p-1 text-muted-foreground hover:bg-muted/50"
-                      aria-label="Annuler"
+                      aria-label={tCommon("cancel")}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -589,7 +733,7 @@ export default function ProfilPage() {
                   {mfaEnrollData.secret && (
                     <div className="text-center">
                       <p className="text-[11px] uppercase tracking-wider text-muted-foreground/50">
-                        {"Ou saisissez ce code manuellement"}
+                        {t("manualCode")}
                       </p>
                       <code className="mt-1 inline-block rounded bg-muted/40 px-2 py-1 text-[12px] font-mono text-foreground/80">
                         {mfaEnrollData.secret}
@@ -598,7 +742,7 @@ export default function ProfilPage() {
                   )}
 
                   <div>
-                    <label className={labelClass}>{"Code de v\u00e9rification"}</label>
+                    <label className={labelClass}>{tAuth("verificationCode")}</label>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -625,10 +769,10 @@ export default function ProfilPage() {
                       {mfaVerifying ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          {"V\u00e9rification..."}
+                          {tCommon("verifying")}
                         </span>
                       ) : (
-                        "V\u00e9rifier"
+                        tAuth("verify")
                       )}
                     </button>
                     <button
@@ -636,7 +780,7 @@ export default function ProfilPage() {
                       onClick={handleCancelEnroll}
                       className="text-[13px] text-muted-foreground hover:text-foreground"
                     >
-                      Annuler
+                      {tCommon("cancel")}
                     </button>
                   </div>
                 </div>
@@ -646,10 +790,10 @@ export default function ProfilPage() {
               {showDisableConfirm && (
                 <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/5 p-4">
                   <p className="text-[13px] font-medium text-foreground/90">
-                    {"D\u00e9sactiver le 2FA ?"}
+                    {t("disable2FAConfirm")}
                   </p>
                   <p className="mt-1 text-[12px] text-muted-foreground/70">
-                    {"Votre compte sera moins prot\u00e9g\u00e9. Vous pourrez le r\u00e9activer \u00e0 tout moment."}
+                    {t("disable2FAWarning")}
                   </p>
                   {mfaError && (
                     <p className="mt-2 text-[12px] text-red-400">{mfaError}</p>
@@ -664,10 +808,10 @@ export default function ProfilPage() {
                       {disabling ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-3 w-3 animate-spin" />
-                          {"D\u00e9sactivation..."}
+                          {t("disabling")}
                         </span>
                       ) : (
-                        "Confirmer"
+                        tCommon("confirm")
                       )}
                     </button>
                     <button
@@ -678,7 +822,7 @@ export default function ProfilPage() {
                       }}
                       className="text-[12px] text-muted-foreground hover:text-foreground"
                     >
-                      Annuler
+                      {tCommon("cancel")}
                     </button>
                   </div>
                 </div>

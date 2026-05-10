@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import "./globals.css";
 
@@ -28,13 +30,16 @@ export const viewport: Viewport = {
   themeColor: "#080808",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="fr">
+    <html lang={locale}>
       <head>
         {/* Preconnect to Supabase (auth, storage, realtime) - speeds up first request */}
         <link rel="preconnect" href="https://riwfbwtrochnfqoixcco.supabase.co" crossOrigin="" />
@@ -44,7 +49,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
       <body className={inter.className}>
-        <TRPCProvider>{children}</TRPCProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <TRPCProvider>{children}</TRPCProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

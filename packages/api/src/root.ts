@@ -18,6 +18,10 @@ import { pollRouter } from "./routers/poll";
 import { attachmentRouter } from "./routers/attachment";
 import { auditRouter } from "./routers/audit";
 import { tagRouter } from "./routers/tag";
+import { entraideRouter } from "./routers/entraide";
+import { mentorshipRouter } from "./routers/mentorship";
+import { resourceRouter } from "./routers/resource";
+import { replayRouter } from "./routers/replay";
 
 export const appRouter = router({
   channel: channelRouter,
@@ -39,6 +43,10 @@ export const appRouter = router({
   attachment: attachmentRouter,
   audit: auditRouter,
   tag: tagRouter,
+  entraide: entraideRouter,
+  mentorship: mentorshipRouter,
+  resource: resourceRouter,
+  replay: replayRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -940,7 +940,7 @@ export default function ChannelPage({
 
       {/* Composer */}
       {!ch?.isReadOnly && (
-        <div className="border-t p-4">
+        <div className="border-t p-2 md:p-4">
           {/* Reply bar */}
           {replyTo && (
             <div className="mb-2 flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs">

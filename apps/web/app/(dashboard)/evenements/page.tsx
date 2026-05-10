@@ -55,21 +55,22 @@ function MonthCalendar({ events }: { events: any[] }) {
           \u2192
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
-        {weekdays.map((d) => (
-          <div
-            key={d}
-            className="bg-card px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
-          >
-            {d}
-          </div>
-        ))}
-        {days.map((d, i) => {
-          if (!d) return <div key={i} className="min-h-[96px] bg-card/50" />;
-          const dayEvents = eventsByDate.get(d.toDateString()) ?? [];
-          const isToday = d.toDateString() === new Date().toDateString();
-          return (
-            <div key={i} className="min-h-[96px] bg-card p-2">
+      <div className="overflow-x-auto">
+        <div className="grid min-w-[560px] grid-cols-7 gap-px overflow-hidden rounded-xl border border-border bg-border">
+          {weekdays.map((d) => (
+            <div
+              key={d}
+              className="bg-card px-2 py-2 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+            >
+              {d}
+            </div>
+          ))}
+          {days.map((d, i) => {
+            if (!d) return <div key={i} className="min-h-[96px] bg-card/50" />;
+            const dayEvents = eventsByDate.get(d.toDateString()) ?? [];
+            const isToday = d.toDateString() === new Date().toDateString();
+            return (
+              <div key={i} className="min-h-[96px] bg-card p-2">
               <div
                 className={cn(
                   "text-xs font-medium",
@@ -78,19 +79,20 @@ function MonthCalendar({ events }: { events: any[] }) {
               >
                 {d.getDate()}
               </div>
-              {dayEvents.map((e) => (
-                <Link
-                  key={e.id}
-                  href={`/evenements/${e.id}`}
-                  className="mt-1 block truncate rounded bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary hover:bg-primary/20"
-                  title={e.title}
-                >
-                  {e.title}
-                </Link>
-              ))}
-            </div>
-          );
-        })}
+                {dayEvents.map((e) => (
+                  <Link
+                    key={e.id}
+                    href={`/evenements/${e.id}`}
+                    className="mt-1 block truncate rounded bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary hover:bg-primary/20"
+                    title={e.title}
+                  >
+                    {e.title}
+                  </Link>
+                ))}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

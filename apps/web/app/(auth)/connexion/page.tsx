@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ConnexionPage() {
+  const tAuth = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +35,7 @@ export default function ConnexionPage() {
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
-      setError("Email ou mot de passe incorrect");
+      setError(tAuth("invalidCredentials"));
       setLoading(false);
       return;
     }
@@ -92,7 +95,7 @@ export default function ConnexionPage() {
   const handleVerifyMfa = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mfaFactorId || !mfaChallengeId || mfaCode.length !== 6) {
-      setMfaError("Entrez un code à 6 chiffres");
+      setMfaError(tAuth("enterSixDigitCode"));
       return;
     }
     setMfaError(null);
@@ -104,7 +107,7 @@ export default function ConnexionPage() {
         code: mfaCode,
       });
       if (verErr) {
-        setMfaError("Code invalide");
+        setMfaError(tAuth("invalidCode"));
         setMfaLoading(false);
         return;
       }
@@ -112,7 +115,7 @@ export default function ConnexionPage() {
       router.refresh();
     } catch (err: any) {
       console.error("Verify error:", err);
-      setMfaError(err.message || "Erreur de vérification");
+      setMfaError(err.message || tAuth("verificationError"));
       setMfaLoading(false);
     }
   };
@@ -134,10 +137,10 @@ export default function ConnexionPage() {
             <Shield className="h-7 w-7 text-white/70" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-white">
-            {"Vérification 2FA"}
+            {tAuth("twoFactorTitle")}
           </h1>
           <p className="mt-2 text-[13px] text-white/40">
-            {"Entrez le code à 6 chiffres de votre application"}
+            {tAuth("twoFactorSubtitle")}
           </p>
         </div>
 
@@ -147,7 +150,7 @@ export default function ConnexionPage() {
               htmlFor="mfa-code"
               className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2"
             >
-              {"Code de vérification"}
+              {tAuth("verificationCode")}
             </label>
             <input
               id="mfa-code"
@@ -176,7 +179,7 @@ export default function ConnexionPage() {
             {mfaLoading ? (
               <Loader2 className="mx-auto h-4 w-4 animate-spin" />
             ) : (
-              "Vérifier"
+              tAuth("verify")
             )}
           </button>
 
@@ -185,7 +188,7 @@ export default function ConnexionPage() {
             onClick={handleCancelMfa}
             className="w-full text-center text-[13px] text-white/40 hover:text-white/60 transition-colors"
           >
-            Annuler
+            {tCommon("cancel")}
           </button>
         </form>
       </div>
@@ -198,33 +201,33 @@ export default function ConnexionPage() {
         <img src="/logo-kretz-club.svg" alt="Kretz Club" className="mx-auto mb-6 h-16 w-16 opacity-90" />
         <h1 className="text-2xl font-semibold tracking-tight text-white">Kretz Club</h1>
         <p className="mt-2 text-[13px] text-white/40">
-          {"Connectez-vous pour accéder au club"}
+          {tAuth("loginTitle")}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">Email</label>
+          <label htmlFor="email" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">{tAuth("email")}</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@exemple.com"
+            placeholder={tAuth("emailPlaceholder")}
             required
             className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">Mot de passe</label>
+          <label htmlFor="password" className="block text-[12px] font-medium text-white/50 uppercase tracking-wider mb-2">{tAuth("password")}</label>
           <div className="relative">
             <input
               id="password"
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={"Votre mot de passe"}
+              placeholder={tAuth("passwordPlaceholder")}
               required
               className="block w-full rounded-md border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 pr-10 text-[14px] text-white placeholder:text-white/20 focus:border-white/20 focus:outline-none focus:ring-0 transition-colors"
             />
@@ -245,20 +248,20 @@ export default function ConnexionPage() {
           disabled={loading}
           className="w-full rounded-md bg-white px-4 py-2.5 text-[14px] font-semibold text-black hover:bg-white/90 disabled:opacity-50 transition-colors"
         >
-          {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Se connecter"}
+          {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : tAuth("login")}
         </button>
       </form>
 
       <p className="text-center text-[13px]">
         <Link href="/mot-de-passe-oublie" className="font-medium text-white/40 hover:text-white transition-colors">
-          {"Mot de passe oublié ?"}
+          {tAuth("forgotPassword")}
         </Link>
       </p>
 
       <p className="text-center text-[13px] text-white/30">
-        {"Pas encore membre ? "}
+        {tAuth("noAccount")}{" "}
         <Link href="/inscription" className="font-medium text-white/60 hover:text-white transition-colors">
-          {"Créer un compte"}
+          {tAuth("createAccount")}
         </Link>
       </p>
     </div>

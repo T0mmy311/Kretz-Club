@@ -58,7 +58,7 @@ export default function InvestissementsPage() {
 
   return (
     <div className="p-4 lg:p-6">
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Investissements</h2>
           <p className="mt-1 text-[13px] text-muted-foreground">
@@ -67,7 +67,7 @@ export default function InvestissementsPage() {
         </div>
         <Link
           href="/investissements/portfolio"
-          className="flex items-center gap-2 rounded-md bg-muted/50 px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted transition-colors"
+          className="inline-flex w-fit items-center gap-2 rounded-md bg-muted/50 px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted transition-colors"
         >
           <BarChart3 className="h-4 w-4" />
           Mon portfolio

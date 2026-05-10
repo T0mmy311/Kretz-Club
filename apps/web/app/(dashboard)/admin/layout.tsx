@@ -15,6 +15,7 @@ import {
   MessageSquareWarning,
   BarChart3,
   PieChart,
+  Video,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const adminNav = [
   { href: "/admin/invitations", label: "Invitations", icon: Mail },
   { href: "/admin/investissements", label: "Investissements", icon: TrendingUp },
   { href: "/admin/evenements", label: "Événements", icon: Calendar },
+  { href: "/admin/replays", label: "Replays", icon: Video },
   { href: "/admin/channels", label: "Channels", icon: Hash },
   { href: "/admin/stats", label: "Statistiques", icon: BarChart3 },
   { href: "/admin/sondages", label: "Sondages", icon: PieChart },

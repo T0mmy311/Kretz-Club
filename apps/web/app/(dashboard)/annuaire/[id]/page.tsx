@@ -14,6 +14,7 @@ import {
   Loader2,
   User,
   Star,
+  Globe,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 
@@ -156,19 +157,68 @@ export default function MemberDetailPage() {
         )}
 
         {/* Contact info */}
-        {(member.linkedinUrl || member.phone) && (
-          <div className="mt-4 rounded-xl border border-border bg-card p-6">
+        {(member.linkedinUrl ||
+          member.phone ||
+          (member as any).websiteUrl ||
+          (member as any).instagramUrl ||
+          (member as any).twitterUrl ||
+          (member as any).facebookUrl) && (
+          <div className="mt-4 rounded-xl border border-border bg-card p-4 sm:p-6">
             <h2 className="mb-3 text-[12px] font-medium uppercase tracking-wider text-muted-foreground/80">Contact</h2>
             <div className="space-y-3">
+              {(member as any).websiteUrl && (
+                <a
+                  href={(member as any).websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors break-all"
+                >
+                  <Globe className="h-4 w-4 shrink-0" />
+                  {"Site internet"}
+                </a>
+              )}
               {member.linkedinUrl && (
                 <a
                   href={member.linkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors break-all"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4 shrink-0" />
                   LinkedIn
+                </a>
+              )}
+              {(member as any).instagramUrl && (
+                <a
+                  href={(member as any).instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors break-all"
+                >
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                  Instagram
+                </a>
+              )}
+              {(member as any).twitterUrl && (
+                <a
+                  href={(member as any).twitterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors break-all"
+                >
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                  X / Twitter
+                </a>
+              )}
+              {(member as any).facebookUrl && (
+                <a
+                  href={(member as any).facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors break-all"
+                >
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                  Facebook
                 </a>
               )}
               {member.phone && (
@@ -176,7 +226,7 @@ export default function MemberDetailPage() {
                   href={`tel:${member.phone}`}
                   className="flex items-center gap-2 text-[14px] text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Phone className="h-4 w-4" />
+                  <Phone className="h-4 w-4 shrink-0" />
                   {member.phone}
                 </a>
               )}

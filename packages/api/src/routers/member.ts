@@ -84,6 +84,10 @@ export const memberRouter = router({
           phone: input.phone,
           city: input.city,
           linkedinUrl: input.linkedinUrl || null,
+          instagramUrl: input.instagramUrl || null,
+          twitterUrl: input.twitterUrl || null,
+          websiteUrl: input.websiteUrl || null,
+          facebookUrl: input.facebookUrl || null,
           ...(dobValue !== undefined ? { dateOfBirth: dobValue } : {}),
           ...(input.showBirthday !== undefined ? { showBirthday: input.showBirthday } : {}),
         },
@@ -99,6 +103,17 @@ export const memberRouter = router({
         where: { id: ctx.member.id },
         data: { theme: input.theme },
         select: { id: true, theme: true },
+      });
+      return updated;
+    }),
+
+  setLocale: protectedProcedure
+    .input(z.object({ locale: z.enum(["fr", "en"]) }))
+    .mutation(async ({ ctx, input }) => {
+      const updated = await prisma.member.update({
+        where: { id: ctx.member.id },
+        data: { locale: input.locale },
+        select: { id: true, locale: true },
       });
       return updated;
     }),

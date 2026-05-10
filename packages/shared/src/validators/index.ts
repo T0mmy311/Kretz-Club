@@ -15,6 +15,10 @@ export const updateProfileSchema = z.object({
   phone: z.string().optional(),
   city: z.string().optional(),
   linkedinUrl: z.string().url("URL LinkedIn invalide").optional().or(z.literal("")),
+  instagramUrl: z.string().url("URL Instagram invalide").optional().or(z.literal("")),
+  twitterUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  websiteUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  facebookUrl: z.string().url("URL invalide").optional().or(z.literal("")),
   dateOfBirth: z.string().optional(),
   showBirthday: z.boolean().optional(),
 });

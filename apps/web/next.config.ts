@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
 
-const nextConfig: NextConfig = {
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+const baseConfig: NextConfig = {
   transpilePackages: ["@kretz/api", "@kretz/db", "@kretz/shared", "@kretz/payments"],
   images: {
     remotePatterns: [
@@ -11,6 +14,8 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
   },
 };
+
+const nextConfig: NextConfig = withNextIntl(baseConfig);
 
 const hasSentryConfig =
   !!process.env.SENTRY_DSN &&
