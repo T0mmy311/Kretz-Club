@@ -28,6 +28,8 @@ model Member {
   isAdmin        Boolean  @default(false) @map("is_admin")
   isActive       Boolean  @default(true) @map("is_active")
   theme          String?  @default("dark")
+  dateOfBirth    DateTime? @map("date_of_birth") @db.Date
+  showBirthday   Boolean  @default(true) @map("show_birthday")
   joinedAt       DateTime @default(now()) @map("joined_at") @db.Timestamptz
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -54,9 +56,20 @@ model Member {
   pollVotes               PollVote[]
   pinnedMessages          Message[]              @relation("PinnedMessages")
   auditLogs               AuditLog[]              @relation("AuditActor")
+  tags                    Tag[]                   @relation("MemberTags")
 
   @@index([isActive])
   @@map("members")
+}
+
+model Tag {
+  id    String  @id @default(uuid()) @db.Uuid
+  name  String  @unique
+  color String?
+
+  members Member[] @relation("MemberTags")
+
+  @@map("tags")
 }
 
 // ============================================

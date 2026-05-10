@@ -123,6 +123,28 @@ export default function MemberDetailPage() {
               })}
             </p>
           )}
+
+          {/* Tags */}
+          {(member as any).tags && (member as any).tags.length > 0 && (
+            <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+              {(member as any).tags.map((tag: any) => {
+                const color = tag.color || "#888888";
+                return (
+                  <span
+                    key={tag.id}
+                    className="rounded-full border px-2.5 py-1 text-[11px] font-medium"
+                    style={{
+                      backgroundColor: `${color}22`,
+                      borderColor: `${color}55`,
+                      color: color,
+                    }}
+                  >
+                    {tag.name}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Bio */}

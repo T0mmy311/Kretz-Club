@@ -187,6 +187,21 @@ export default function ProfilPage() {
     phone: "",
     city: "",
     linkedinUrl: "",
+    dateOfBirth: "",
+    showBirthday: true,
+  });
+
+  // Tags state
+  const { data: allTags } = trpc.tag.list.useQuery();
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const setTagsMutation = trpc.member.setTags.useMutation({
+    onSuccess: () => {
+      utils.member.me.invalidate();
+      toast.success("Centres d'intérêt mis à jour");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Erreur lors de la mise à jour des tags");
+    },
   });
 
   useEffect(() => {
@@ -201,8 +216,13 @@ export default function ProfilPage() {
         phone: p.phone || "",
         city: p.city || "",
         linkedinUrl: p.linkedinUrl || "",
+        dateOfBirth: p.dateOfBirth ? new Date(p.dateOfBirth).toISOString().slice(0, 10) : "",
+        showBirthday: p.showBirthday !== false,
       });
       setAvatarUrl(p.avatarUrl || null);
+      if (Array.isArray(p.tags)) {
+        setSelectedTagIds(p.tags.map((t: any) => t.id));
+      }
     }
   }, [profile]);
 
@@ -214,7 +234,22 @@ export default function ProfilPage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const target = e.target as HTMLInputElement;
+    if (target.type === "checkbox") {
+      setForm((prev) => ({ ...prev, [target.name]: target.checked }));
+    } else {
+      setForm((prev) => ({ ...prev, [target.name]: target.value }));
+    }
+  };
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTagIds((prev) => {
+      const next = prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId];
+      setTagsMutation.mutate({ tagIds: next });
+      return next;
+    });
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,6 +285,13 @@ export default function ProfilPage() {
 
   const inputClass = "mt-1.5 block w-full rounded-md border border-border bg-muted/30 px-3 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground/40 focus:border-border/80 focus:outline-none focus:ring-0 transition-colors";
   const labelClass = "block text-[12px] font-medium text-muted-foreground uppercase tracking-wider";
+
+  const cnPills = (selected: boolean) =>
+    `rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors ${
+      selected
+        ? "shadow-sm"
+        : "border-border bg-card text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+    } disabled:opacity-50`;
 
   if (isLoading) {
     return (
@@ -367,6 +409,31 @@ export default function ProfilPage() {
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>{"Date de naissance"}</label>
+              <input
+                name="dateOfBirth"
+                value={form.dateOfBirth}
+                onChange={handleChange}
+                type="date"
+                className={inputClass}
+              />
+            </div>
+            <div className="flex items-end">
+              <label className="flex items-center gap-2.5 pb-2.5 text-[13px] text-foreground/80 cursor-pointer select-none">
+                <input
+                  name="showBirthday"
+                  type="checkbox"
+                  checked={form.showBirthday}
+                  onChange={handleChange}
+                  className="h-4 w-4 rounded border-border bg-muted/40 accent-amber-500"
+                />
+                {"Afficher mon anniversaire aux autres membres"}
+              </label>
+            </div>
+          </div>
+
           <div className="flex items-center gap-4 pt-2">
             <button
               type="submit"
@@ -388,6 +455,47 @@ export default function ProfilPage() {
 
           </div>
         </form>
+
+        {/* Centres d'intérêt / Tags */}
+        <div className="mt-12 border-t border-border pt-8">
+          <div className="mb-2">
+            <h3 className="text-[15px] font-semibold text-foreground">{"Centres d'intérêt"}</h3>
+            <p className="mt-1 text-[12px] text-muted-foreground/70">
+              {"Aidez les autres membres à vous trouver. Cliquez pour ajouter ou retirer."}
+            </p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {(allTags ?? []).map((tag: any) => {
+              const selected = selectedTagIds.includes(tag.id);
+              const color = tag.color || "#888888";
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  disabled={setTagsMutation.isPending}
+                  className={cnPills(selected)}
+                  style={
+                    selected
+                      ? {
+                          backgroundColor: `${color}33`,
+                          borderColor: color,
+                          color: color,
+                        }
+                      : undefined
+                  }
+                >
+                  {tag.name}
+                </button>
+              );
+            })}
+            {(!allTags || allTags.length === 0) && (
+              <p className="text-[12px] text-muted-foreground/60">
+                {"Aucun tag disponible"}
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Security section - admins only */}
         {isAdmin && (

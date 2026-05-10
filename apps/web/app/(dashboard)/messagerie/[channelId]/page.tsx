@@ -21,6 +21,8 @@ import {
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { createClient } from "@/lib/supabase/client";
+import { useNotifications } from "@/hooks/useNotifications";
+import { ChannelPolls } from "@/components/ChannelPolls";
 
 // ---- helpers ----------------------------------------------------------------
 
@@ -263,6 +265,8 @@ export default function ChannelPage({
   const supabaseBroadcastRef = useRef<ReturnType<
     ReturnType<typeof createClient>["channel"]
   > | null>(null);
+  const allMessagesRef = useRef<MessageItem[]>([]);
+  const currentChannelRef = useRef<{ displayName?: string } | null>(null);
 
   // -- queries ----------------------------------------------------------------
   const { data: meData } = trpc.member.me.useQuery();
@@ -282,6 +286,7 @@ export default function ChannelPage({
   } = trpc.message.list.useQuery({ channelId }, { enabled: !!channelId });
 
   const utils = trpc.useUtils();
+  const { notify } = useNotifications();
 
   // -- mutations --------------------------------------------------------------
   const sendMessage = trpc.message.send.useMutation({
@@ -467,6 +472,14 @@ export default function ChannelPage({
     },
   });
 
+  // -- keep refs in sync for the realtime callback ---------------------------
+  useEffect(() => {
+    allMessagesRef.current = (messagesData?.messages ?? []) as MessageItem[];
+  }, [messagesData]);
+  useEffect(() => {
+    currentChannelRef.current = currentChannel as any;
+  }, [currentChannel]);
+
   // -- mark channel read ------------------------------------------------------
   const markRead = trpc.channel.markRead.useMutation();
   useEffect(() => {
@@ -489,7 +502,35 @@ export default function ChannelPage({
           table: "messages",
           filter: `channel_id=eq.${channelId}`,
         },
-        () => refetch()
+        (payload: any) => {
+          // If a brand-new message arrives from someone else and the user
+          // isn't actively looking at the tab, surface a notification
+          // (the notify hook itself no-ops when the tab is focused).
+          if (payload.eventType === "INSERT") {
+            const row = payload.new ?? {};
+            if (
+              row.author_id &&
+              row.author_id !== myId &&
+              !row.parent_id
+            ) {
+              const authorName =
+                allMessagesRef.current.find(
+                  (m) => m.author.id === row.author_id
+                )?.author;
+              const displayAuthor = authorName
+                ? `${authorName.firstName} ${authorName.lastName}`.trim()
+                : "Nouveau message";
+              const content = String(row.content ?? "");
+              const truncated =
+                content.length > 100 ? content.slice(0, 99) + "…" : content;
+              notify(`#${currentChannelRef.current?.displayName ?? "channel"}`, {
+                body: `${displayAuthor}: ${truncated}`,
+                tag: `channel-${channelId}`,
+              });
+            }
+          }
+          refetch();
+        }
       )
       .on(
         "postgres_changes",
@@ -680,6 +721,9 @@ export default function ChannelPage({
         <Hash className="h-5 w-5 text-muted-foreground" />
         <h2 className="font-semibold">{ch?.displayName ?? "Channel"}</h2>
       </div>
+
+      {/* Polls */}
+      <ChannelPolls channelId={channelId} />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">

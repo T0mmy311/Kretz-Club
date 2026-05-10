@@ -717,6 +717,71 @@ export const adminRouter = router({
     }),
 
   // ============================================
+  // CHANNEL STATISTICS
+  // ============================================
+  channelStats: adminProcedure.query(async () => {
+    const channels = await prisma.channel.findMany({
+      select: {
+        id: true,
+        displayName: true,
+        category: true,
+        _count: {
+          select: {
+            messages: true,
+            members: true,
+          },
+        },
+      },
+      orderBy: { sortOrder: "asc" },
+    });
+
+    // Get last 7 days message count per channel
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentMessages = await prisma.message.groupBy({
+      by: ["channelId"],
+      where: {
+        channelId: { not: null },
+        createdAt: { gte: sevenDaysAgo },
+      },
+      _count: true,
+    });
+
+    const recentByChannel = new Map(
+      recentMessages.map((r) => [r.channelId, r._count])
+    );
+
+    // Get top contributors per channel
+    const topContributors = await prisma.message.groupBy({
+      by: ["channelId", "authorId"],
+      _count: true,
+      where: { channelId: { not: null } },
+      orderBy: { _count: { authorId: "desc" } },
+      take: 200,
+    });
+
+    const authorIds = [...new Set(topContributors.map((t) => t.authorId))];
+    const authors = await prisma.member.findMany({
+      where: { id: { in: authorIds } },
+      select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+    });
+    const authorMap = new Map(authors.map((a) => [a.id, a]));
+
+    return channels.map((c) => ({
+      ...c,
+      messagesLast7Days: recentByChannel.get(c.id) ?? 0,
+      topContributors: topContributors
+        .filter((t) => t.channelId === c.id)
+        .slice(0, 3)
+        .map((t) => ({
+          member: authorMap.get(t.authorId) ?? null,
+          messageCount: t._count,
+        })),
+    }));
+  }),
+
+  // ============================================
   // ALBUMS / GALLERY
   // ============================================
   listAlbums: adminProcedure.query(async () => {

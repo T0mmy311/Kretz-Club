@@ -21,7 +21,10 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import SearchPalette from "@/components/SearchPalette";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import NotificationPrompt from "@/components/NotificationPrompt";
+import GlobalNotifications from "@/components/GlobalNotifications";
 import ThemeToggle from "@/components/ThemeToggle";
+import BirthdayBanner from "@/components/BirthdayBanner";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { useUnreadCounts } from "@/hooks/useUnreadCounts";
 import { trpc } from "@/lib/trpc/client";
@@ -203,9 +206,12 @@ export default function DashboardLayout({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto bg-background pb-16 lg:pb-0">
+        <NotificationPrompt />
         <PWAInstallPrompt />
+        <BirthdayBanner />
         {children}
       </main>
+      <GlobalNotifications />
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden border-t border-border bg-card/95 backdrop-blur-xl safe-area-bottom">

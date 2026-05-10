@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { prisma } from "@kretz/db";
-import { router, protectedProcedure } from "../trpc";
+import { router, protectedProcedure, adminProcedure } from "../trpc";
 
 export const pollRouter = router({
   /**
-   * Create a poll with options in a channel.
+   * Create a poll with options in a channel. Admin only.
    */
-  create: protectedProcedure
+  create: adminProcedure
     .input(
       z.object({
         channelId: z.string().uuid(),
@@ -146,5 +146,55 @@ export const pollRouter = router({
             : option.votes.map((v) => v.member),
         })),
       }));
+    }),
+
+  /**
+   * Admin: list all polls (across all channels) with vote counts.
+   */
+  listAll: adminProcedure.query(async () => {
+    const polls = await prisma.poll.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        channel: { select: { id: true, displayName: true, name: true, category: true } },
+        author: {
+          select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+        },
+        options: {
+          include: {
+            _count: { select: { votes: true } },
+          },
+        },
+      },
+    });
+
+    return polls.map((poll) => ({
+      ...poll,
+      options: poll.options.map((option) => ({
+        id: option.id,
+        text: option.text,
+        voteCount: option._count.votes,
+      })),
+      totalVotes: poll.options.reduce((sum, o) => sum + o._count.votes, 0),
+    }));
+  }),
+
+  /**
+   * Admin: delete a poll (and its options + votes via cascade).
+   */
+  delete: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input }) => {
+      const existing = await prisma.poll.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Sondage introuvable" });
+      }
+
+      // Cascade deletes options and votes via schema relations
+      await prisma.poll.delete({ where: { id: input.id } });
+
+      return { success: true };
     }),
 });

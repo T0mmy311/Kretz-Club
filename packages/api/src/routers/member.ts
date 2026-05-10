@@ -8,6 +8,11 @@ export const memberRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
     const member = await prisma.member.findUnique({
       where: { id: ctx.member.id },
+      include: {
+        tags: {
+          select: { id: true, name: true, color: true },
+        },
+      },
     });
 
     if (!member) {
@@ -23,6 +28,9 @@ export const memberRouter = router({
       const member = await prisma.member.findUnique({
         where: { id: input.id },
         include: {
+          tags: {
+            select: { id: true, name: true, color: true },
+          },
           receivedRecommendations: {
             where: { isPublic: true },
             include: {
@@ -52,6 +60,19 @@ export const memberRouter = router({
   updateProfile: protectedProcedure
     .input(updateProfileSchema)
     .mutation(async ({ ctx, input }) => {
+      // Parse dateOfBirth ISO string to Date or null
+      let dobValue: Date | null | undefined = undefined;
+      if (input.dateOfBirth !== undefined) {
+        if (!input.dateOfBirth || input.dateOfBirth === "") {
+          dobValue = null;
+        } else {
+          const parsed = new Date(input.dateOfBirth);
+          if (!isNaN(parsed.getTime())) {
+            dobValue = parsed;
+          }
+        }
+      }
+
       const updated = await prisma.member.update({
         where: { id: ctx.member.id },
         data: {
@@ -63,6 +84,8 @@ export const memberRouter = router({
           phone: input.phone,
           city: input.city,
           linkedinUrl: input.linkedinUrl || null,
+          ...(dobValue !== undefined ? { dateOfBirth: dobValue } : {}),
+          ...(input.showBirthday !== undefined ? { showBirthday: input.showBirthday } : {}),
         },
       });
 
@@ -79,6 +102,57 @@ export const memberRouter = router({
       });
       return updated;
     }),
+
+  setTags: protectedProcedure
+    .input(z.object({ tagIds: z.array(z.string().uuid()) }))
+    .mutation(async ({ ctx, input }) => {
+      const updated = await prisma.member.update({
+        where: { id: ctx.member.id },
+        data: {
+          tags: {
+            set: input.tagIds.map((id) => ({ id })),
+          },
+        },
+        include: {
+          tags: { select: { id: true, name: true, color: true } },
+        },
+      });
+      return updated;
+    }),
+
+  getBirthdaysToday: protectedProcedure.query(async () => {
+    const today = new Date();
+    const month = today.getMonth() + 1; // 1-12
+    const day = today.getDate();
+
+    // Use raw SQL to compare month+day from date_of_birth.
+    const members = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        first_name: string;
+        last_name: string;
+        avatar_url: string | null;
+        profession: string | null;
+      }>
+    >`
+      SELECT id, first_name, last_name, avatar_url, profession
+      FROM members
+      WHERE is_active = true
+        AND show_birthday = true
+        AND date_of_birth IS NOT NULL
+        AND EXTRACT(MONTH FROM date_of_birth) = ${month}
+        AND EXTRACT(DAY FROM date_of_birth) = ${day}
+      ORDER BY first_name ASC, last_name ASC
+    `;
+
+    return members.map((m) => ({
+      id: m.id,
+      firstName: m.first_name,
+      lastName: m.last_name,
+      avatarUrl: m.avatar_url,
+      profession: m.profession,
+    }));
+  }),
 
   search: protectedProcedure
     .input(
@@ -115,6 +189,7 @@ export const memberRouter = router({
           bio: true,
           city: true,
           joinedAt: true,
+          tags: { select: { id: true, name: true, color: true } },
         },
       });
 
@@ -153,6 +228,7 @@ export const memberRouter = router({
             bio: true,
             city: true,
             joinedAt: true,
+            tags: { select: { id: true, name: true, color: true } },
           },
         }),
         prisma.member.count({ where: { isActive: true } }),

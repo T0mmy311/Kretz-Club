@@ -12,6 +12,7 @@ export default function AnnuairePage() {
   const [search, setSearch] = useState("");
   const [filterCity, setFilterCity] = useState("");
   const [filterProfession, setFilterProfession] = useState("");
+  const [filterTagIds, setFilterTagIds] = useState<string[]>([]);
   const [extraMembers, setExtraMembers] = useState<any[]>([]);
   const [latestCursor, setLatestCursor] = useState<string | undefined>(undefined);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -20,6 +21,7 @@ export default function AnnuairePage() {
   const currentMemberId = (meData as any)?.id;
 
   const { data } = trpc.member.list.useQuery({ limit: 50 });
+  const { data: allTags } = trpc.tag.list.useQuery();
 
   const utils = trpc.useUtils();
 
@@ -63,6 +65,12 @@ export default function AnnuairePage() {
       m.profession?.toLowerCase().includes(filterProfession.toLowerCase())
     );
   }
+  if (filterTagIds.length > 0) {
+    members = members.filter((m: any) => {
+      const memberTagIds = (m.tags ?? []).map((t: any) => t.id);
+      return filterTagIds.every((id) => memberTagIds.includes(id));
+    });
+  }
 
   // Extract unique cities and professions for filter suggestions
   const cities = [...new Set(allMembers.map((m: any) => m.city).filter(Boolean))] as string[];
@@ -78,7 +86,13 @@ export default function AnnuairePage() {
     return `${(firstName || "?")[0]}${(lastName || "")[0] || ""}`.toUpperCase();
   };
 
-  const hasFilters = filterCity || filterProfession;
+  const hasFilters = filterCity || filterProfession || filterTagIds.length > 0;
+
+  const toggleTagFilter = (tagId: string) => {
+    setFilterTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  };
 
   return (
     <div className="p-4 lg:p-6">
@@ -164,13 +178,52 @@ export default function AnnuairePage() {
 
           {hasFilters && (
             <button
-              onClick={() => { setFilterCity(""); setFilterProfession(""); }}
+              onClick={() => { setFilterCity(""); setFilterProfession(""); setFilterTagIds([]); }}
               className="rounded-full border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
             >
               Effacer les filtres
             </button>
           )}
         </div>
+
+        {/* Tag filters */}
+        {allTags && allTags.length > 0 && (
+          <div className="rounded-lg border border-border/50 bg-card/40 p-3">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {"🏷️ Centres d'intérêt"}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {allTags.map((tag: any) => {
+                const selected = filterTagIds.includes(tag.id);
+                const color = tag.color || "#888888";
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => toggleTagFilter(tag.id)}
+                    className={cn(
+                      "rounded-full border px-3 py-1 text-[11px] font-medium transition-colors",
+                      selected
+                        ? "shadow-sm"
+                        : "border-border bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                    )}
+                    style={
+                      selected
+                        ? {
+                            backgroundColor: `${color}33`,
+                            borderColor: color,
+                            color: color,
+                          }
+                        : undefined
+                    }
+                  >
+                    {tag.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Results count */}
         <p className="text-xs text-muted-foreground">
@@ -238,6 +291,31 @@ export default function AnnuairePage() {
                     <MapPin className="h-3 w-3" />
                     {member.city}
                   </p>
+                )}
+                {member.tags && member.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap justify-center gap-1">
+                    {member.tags.slice(0, 3).map((tag: any) => {
+                      const color = tag.color || "#888888";
+                      return (
+                        <span
+                          key={tag.id}
+                          className="rounded-full border px-2 py-0.5 text-[10px] font-medium"
+                          style={{
+                            backgroundColor: `${color}22`,
+                            borderColor: `${color}55`,
+                            color: color,
+                          }}
+                        >
+                          {tag.name}
+                        </span>
+                      );
+                    })}
+                    {member.tags.length > 3 && (
+                      <span className="rounded-full border border-border bg-muted/30 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        +{member.tags.length - 3}
+                      </span>
+                    )}
+                  </div>
                 )}
               </Link>
               {currentMemberId === member.id ? (

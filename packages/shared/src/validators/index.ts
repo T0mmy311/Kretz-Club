@@ -15,6 +15,8 @@ export const updateProfileSchema = z.object({
   phone: z.string().optional(),
   city: z.string().optional(),
   linkedinUrl: z.string().url("URL LinkedIn invalide").optional().or(z.literal("")),
+  dateOfBirth: z.string().optional(),
+  showBirthday: z.boolean().optional(),
 });
 
 // Messages

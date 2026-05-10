@@ -17,6 +17,7 @@ import { invitationRouter } from "./routers/invitation";
 import { pollRouter } from "./routers/poll";
 import { attachmentRouter } from "./routers/attachment";
 import { auditRouter } from "./routers/audit";
+import { tagRouter } from "./routers/tag";
 
 export const appRouter = router({
   channel: channelRouter,
@@ -37,6 +38,7 @@ export const appRouter = router({
   poll: pollRouter,
   attachment: attachmentRouter,
   audit: auditRouter,
+  tag: tagRouter,
 });
 
 export type AppRouter = typeof appRouter;

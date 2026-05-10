@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { createClient } from "@/lib/supabase/client";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // ---- helpers ----------------------------------------------------------------
 
@@ -259,6 +260,7 @@ export default function ConversationPage({
   const supabaseBroadcastRef = useRef<ReturnType<
     ReturnType<typeof createClient>["channel"]
   > | null>(null);
+  const otherRef = useRef<{ firstName?: string; lastName?: string } | null>(null);
 
   // -- queries ----------------------------------------------------------------
   const { data: meData } = trpc.member.me.useQuery();
@@ -278,6 +280,7 @@ export default function ConversationPage({
   );
 
   const utils = trpc.useUtils();
+  const { notify } = useNotifications();
 
   // -- mutations --------------------------------------------------------------
   const sendMessage = trpc.message.send.useMutation({
@@ -455,6 +458,11 @@ export default function ConversationPage({
     },
   });
 
+  // -- keep refs in sync for the realtime callback ---------------------------
+  useEffect(() => {
+    otherRef.current = (other ?? null) as any;
+  }, [other]);
+
   // -- Supabase Realtime ------------------------------------------------------
   useEffect(() => {
     const supabase = createClient();
@@ -469,7 +477,30 @@ export default function ConversationPage({
           table: "messages",
           filter: `conversation_id=eq.${conversationId}`,
         },
-        () => refetch()
+        (payload: any) => {
+          if (payload.eventType === "INSERT") {
+            const row = payload.new ?? {};
+            if (
+              row.author_id &&
+              row.author_id !== myId &&
+              !row.parent_id
+            ) {
+              const o = otherRef.current;
+              const title = o
+                ? `${o.firstName ?? ""} ${o.lastName ?? ""}`.trim() ||
+                  "Nouveau message"
+                : "Nouveau message";
+              const content = String(row.content ?? "");
+              const truncated =
+                content.length > 100 ? content.slice(0, 99) + "…" : content;
+              notify(title, {
+                body: truncated,
+                tag: `dm-${conversationId}`,
+              });
+            }
+          }
+          refetch();
+        }
       )
       .on(
         "postgres_changes",
