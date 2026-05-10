@@ -277,12 +277,59 @@ export default function ConversationPage({
     { enabled: !!conversationId }
   );
 
+  const utils = trpc.useUtils();
+
   // -- mutations --------------------------------------------------------------
   const sendMessage = trpc.message.send.useMutation({
-    onSuccess: async (data) => {
+    onMutate: async (newMessage) => {
+      await utils.message.list.cancel({ conversationId });
+      const prev = utils.message.list.getData({ conversationId });
+      const tempId = `temp-${Date.now()}`;
+      const parent =
+        newMessage.parentId && prev
+          ? (prev.messages as any[]).find((m) => m.id === newMessage.parentId)
+          : null;
+      const optimisticMessage: any = {
+        id: tempId,
+        content: newMessage.content,
+        channelId: null,
+        conversationId: newMessage.conversationId ?? null,
+        parentId: newMessage.parentId ?? null,
+        isEdited: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        author: {
+          id: myId ?? "me",
+          firstName: (meData as any)?.firstName ?? "",
+          lastName: (meData as any)?.lastName ?? "",
+          avatarUrl: (meData as any)?.avatarUrl ?? null,
+        },
+        parent: parent
+          ? {
+              id: parent.id,
+              content: parent.content,
+              author: {
+                id: parent.author.id,
+                firstName: parent.author.firstName,
+                lastName: parent.author.lastName,
+              },
+            }
+          : null,
+        reactions: [],
+        attachments: [],
+        _count: { replies: 0 },
+        __optimistic: true,
+      };
+      utils.message.list.setData({ conversationId }, (old: any) =>
+        old
+          ? { ...old, messages: [optimisticMessage, ...(old.messages ?? [])] }
+          : { messages: [optimisticMessage], nextCursor: undefined }
+      );
       setContent("");
       setReplyTo(null);
-
+      return { prev };
+    },
+    onSuccess: async (data) => {
       if (selectedFile) {
         setIsUploading(true);
         try {
@@ -300,28 +347,112 @@ export default function ConversationPage({
           setIsUploading(false);
         }
       }
-
-      refetch();
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) {
+        utils.message.list.setData({ conversationId }, context.prev);
+      }
+    },
+    onSettled: () => {
+      utils.message.list.invalidate({ conversationId });
     },
   });
 
   const editMessage = trpc.message.edit.useMutation({
-    onSuccess: () => {
+    onMutate: async (vars) => {
+      await utils.message.list.cancel({ conversationId });
+      const prev = utils.message.list.getData({ conversationId });
+      utils.message.list.setData({ conversationId }, (old: any) =>
+        old
+          ? {
+              ...old,
+              messages: (old.messages ?? []).map((m: any) =>
+                m.id === vars.messageId
+                  ? { ...m, content: vars.content, isEdited: true }
+                  : m
+              ),
+            }
+          : old
+      );
       setEditingMessage(null);
       setContent("");
-      refetch();
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) {
+        utils.message.list.setData({ conversationId }, context.prev);
+      }
+    },
+    onSettled: () => {
+      utils.message.list.invalidate({ conversationId });
     },
   });
 
   const deleteMessage = trpc.message.delete.useMutation({
-    onSuccess: () => {
+    onMutate: async (vars) => {
+      await utils.message.list.cancel({ conversationId });
+      const prev = utils.message.list.getData({ conversationId });
+      utils.message.list.setData({ conversationId }, (old: any) =>
+        old
+          ? {
+              ...old,
+              messages: (old.messages ?? []).filter(
+                (m: any) => m.id !== vars.messageId
+              ),
+            }
+          : old
+      );
       setConfirmDeleteId(null);
-      refetch();
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) {
+        utils.message.list.setData({ conversationId }, context.prev);
+      }
+    },
+    onSettled: () => {
+      utils.message.list.invalidate({ conversationId });
     },
   });
 
   const toggleReaction = trpc.reaction.toggle.useMutation({
-    onSuccess: () => refetch(),
+    onMutate: async (vars) => {
+      await utils.message.list.cancel({ conversationId });
+      const prev = utils.message.list.getData({ conversationId });
+      const meId = myId;
+      utils.message.list.setData({ conversationId }, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          messages: (old.messages ?? []).map((m: any) => {
+            if (m.id !== vars.messageId) return m;
+            const existing = (m.reactions ?? []).find(
+              (r: any) => r.emoji === vars.emoji && r.memberId === meId
+            );
+            const reactions = existing
+              ? m.reactions.filter((r: any) => r.id !== existing.id)
+              : [
+                  ...(m.reactions ?? []),
+                  {
+                    id: `temp-react-${Date.now()}`,
+                    emoji: vars.emoji,
+                    memberId: meId ?? "me",
+                  },
+                ];
+            return { ...m, reactions };
+          }),
+        };
+      });
+      return { prev };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prev) {
+        utils.message.list.setData({ conversationId }, context.prev);
+      }
+    },
+    onSettled: () => {
+      utils.message.list.invalidate({ conversationId });
+    },
   });
 
   // -- Supabase Realtime ------------------------------------------------------

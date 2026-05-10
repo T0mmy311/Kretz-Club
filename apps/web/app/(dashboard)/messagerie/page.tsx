@@ -25,6 +25,7 @@ export default function MessageriePage() {
   const [showNewDm, setShowNewDm] = useState(false);
   const [dmSearch, setDmSearch] = useState("");
 
+  const utils = trpc.useUtils();
   const { data: channelsByCategory, isLoading: channelsLoading } = trpc.channel.list.useQuery();
   const { data: conversations, isLoading: dmsLoading } = trpc.conversation.list.useQuery();
   const { data: searchResults } = trpc.member.search.useQuery(
@@ -123,6 +124,9 @@ export default function MessageriePage() {
                         <Link
                           key={channel.id}
                           href={`/messagerie/${channel.id}`}
+                          onMouseEnter={() =>
+                            utils.message.list.prefetch({ channelId: channel.id })
+                          }
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         >
                           <Hash className="h-3.5 w-3.5" />
@@ -209,6 +213,9 @@ export default function MessageriePage() {
                       <Link
                         key={conv.id}
                         href={`/messagerie/dm/${conv.id}`}
+                        onMouseEnter={() =>
+                          utils.message.list.prefetch({ conversationId: conv.id })
+                        }
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-accent",
                           conv.hasUnread && "bg-accent/50"

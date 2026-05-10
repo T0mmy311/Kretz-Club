@@ -190,6 +190,16 @@ async function main() {
   const jules = await prisma.member.findFirst({ where: { email: "jules.lamothe@kretzclub.com" } });
   if (!thomas) throw new Error("Thomas not found");
 
+  // Ensure Thomas and Jules are admins
+  if (thomas && !thomas.isAdmin) {
+    await prisma.member.update({ where: { id: thomas.id }, data: { isAdmin: true } });
+    console.log("✅ Promoted Thomas to admin");
+  }
+  if (jules && !jules.isAdmin) {
+    await prisma.member.update({ where: { id: jules.id }, data: { isAdmin: true } });
+    console.log("✅ Promoted Jules to admin");
+  }
+
   // Create demo members (without Supabase auth - display only)
   console.log("👥 Creating demo members...");
   const createdMembers = [];

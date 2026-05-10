@@ -35,6 +35,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
+      <head>
+        {/* Preconnect to Supabase (auth, storage, realtime) - speeds up first request */}
+        <link rel="preconnect" href="https://riwfbwtrochnfqoixcco.supabase.co" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://riwfbwtrochnfqoixcco.supabase.co" />
+        {/* Preconnect to Unsplash (cover photos) */}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
       <body className={inter.className}>
         <TRPCProvider>{children}</TRPCProvider>
       </body>

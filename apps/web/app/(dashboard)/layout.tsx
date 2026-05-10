@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   ScrollText,
+  Shield,
 } from "lucide-react";
 import { Toaster } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -59,6 +60,7 @@ export default function DashboardLayout({
     refetchOnWindowFocus: false,
   });
   const memberAvatarUrl = (meData as any)?.avatarUrl as string | null | undefined;
+  const isAdmin = (meData as any)?.isAdmin === true;
 
   useEffect(() => {
     const getUser = async () => {
@@ -124,6 +126,20 @@ export default function DashboardLayout({
                 </Link>
               );
             })}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={cn(
+                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
+                  pathname.startsWith("/admin")
+                    ? "bg-muted text-foreground"
+                    : "text-amber-400/80 hover:bg-muted/30 hover:text-amber-400"
+                )}
+              >
+                <Shield className={cn("h-[18px] w-[18px]", pathname.startsWith("/admin") ? "text-foreground/80" : "text-amber-400/70")} />
+                Admin
+              </Link>
+            )}
           </div>
         </nav>
 
@@ -243,6 +259,9 @@ export default function DashboardLayout({
                 { name: "Factures", href: "/factures", icon: FileText },
                 { name: "Profil", href: "/profil", icon: Users },
                 { name: "Charte", href: "/charte", icon: ScrollText },
+                ...(isAdmin
+                  ? [{ name: "Admin", href: "/admin", icon: Shield }]
+                  : []),
               ].map((item) => (
                 <Link
                   key={item.href}

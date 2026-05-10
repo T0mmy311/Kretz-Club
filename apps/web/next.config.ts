@@ -3,6 +3,13 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@kretz/api", "@kretz/db", "@kretz/shared", "@kretz/payments"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "riwfbwtrochnfqoixcco.supabase.co" },
+    ],
+    formats: ["image/webp"],
+  },
 };
 
 const hasSentryConfig =

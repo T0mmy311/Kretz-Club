@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   MapPin,
@@ -112,10 +113,13 @@ export default function InvestmentDetailPage() {
       <div className="relative mb-8 flex h-56 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-muted/30 to-card">
         {investment.coverImageUrl ? (
           <>
-            <img
+            <Image
               src={investment.coverImageUrl}
               alt={investment.title}
-              className="h-full w-full object-cover"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </>

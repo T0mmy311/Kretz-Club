@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Image as ImageIcon, ArrowLeft, Calendar, MapPin, X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import Image from "next/image";
 import { trpc } from "@/lib/trpc/client";
 
 export default function GaleriePage() {
@@ -179,10 +180,12 @@ export default function GaleriePage() {
               {/* Cover image */}
               <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                 {album.coverPhotoUrl ? (
-                  <img
+                  <Image
                     src={album.coverPhotoUrl}
                     alt={album.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">

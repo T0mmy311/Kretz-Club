@@ -7,7 +7,25 @@ import superjson from "superjson";
 import { trpc } from "./client";
 
 export function TRPCProvider({ children }: { children: any }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // Avoid refetching on every navigation: data is fresh for 1 min
+            staleTime: 60_000,
+            // Keep data in cache for 5 min after last observer unmounts
+            gcTime: 300_000,
+            // Don't refetch when the tab regains focus (very disruptive UX)
+            refetchOnWindowFocus: false,
+            // Don't refetch when the network reconnects (often a no-op anyway)
+            refetchOnReconnect: false,
+            // Limit retries for snappier failure feedback
+            retry: 1,
+          },
+        },
+      })
+  );
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [

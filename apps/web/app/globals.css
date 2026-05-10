@@ -89,6 +89,17 @@
   }
 }
 
+@layer components {
+  /* Shared admin form input style */
+  .admin-input {
+    @apply w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50;
+  }
+  .admin-input:focus {
+    @apply outline-none;
+    border-color: hsl(var(--foreground) / 0.3);
+  }
+}
+
 @layer utilities {
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);

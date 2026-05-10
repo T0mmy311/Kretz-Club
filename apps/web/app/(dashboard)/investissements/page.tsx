@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TrendingUp, MapPin, ExternalLink, Users, BarChart3, List, Map as MapIcon } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 import { InvestmentMap } from "@/components/InvestmentMap";
@@ -175,10 +176,12 @@ export default function InvestissementsPage() {
                 {/* Cover */}
                 <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                   {investment.coverImageUrl ? (
-                    <img
+                    <Image
                       src={investment.coverImageUrl}
                       alt={investment.title}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover"
                     />
                   ) : (
                     <TrendingUp className="h-10 w-10 text-muted-foreground/30" />
