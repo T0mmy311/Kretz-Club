@@ -659,7 +659,7 @@ export default function ConversationPage({
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 border-b px-4 py-3">
-        <Link href="/messagerie" className="rounded-md p-1 hover:bg-muted">
+        <Link href="/messagerie" className="rounded-md p-1 hover:bg-muted lg:hidden">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         {other ? (

@@ -1,0 +1,277 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Hash, Mail, Plus, Search, User } from "lucide-react";
+import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
+
+const channelGroups = [
+  { key: "le_cercle", label: "Le Cercle", emoji: "🏛️" },
+  { key: "le_grand_salon", label: "Le Grand Salon", emoji: "💬" },
+  { key: "thematiques", label: "Thématiques", emoji: "📌" },
+  { key: "aide", label: "Aide", emoji: "❓" },
+];
+
+interface Channel {
+  id: string;
+  name: string;
+  displayName: string;
+  unreadCount: number;
+}
+
+export function MessageriesSidebar() {
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState<"channels" | "dms">(
+    pathname.startsWith("/messagerie/dm") ? "dms" : "channels"
+  );
+  const [showNewDm, setShowNewDm] = useState(false);
+  const [dmSearch, setDmSearch] = useState("");
+
+  const utils = trpc.useUtils();
+  const { data: channelsByCategory, isLoading: channelsLoading } = trpc.channel.list.useQuery();
+  const { data: conversations, isLoading: dmsLoading } = trpc.conversation.list.useQuery();
+  const { data: searchResults } = trpc.member.search.useQuery(
+    { query: dmSearch },
+    { enabled: dmSearch.length >= 2 }
+  );
+
+  const createConversation = trpc.conversation.create.useMutation({
+    onSuccess: (data) => {
+      setShowNewDm(false);
+      setDmSearch("");
+      window.location.href = `/messagerie/dm/${data.id}`;
+    },
+  });
+
+  function formatLastMessage(msg: any) {
+    if (!msg) return "Pas encore de message";
+    return msg.content.length > 40 ? msg.content.slice(0, 40) + "..." : msg.content;
+  }
+
+  function formatTime(date: Date | string) {
+    const d = new Date(date);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    }
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  }
+
+  // Detect active channel/conversation from pathname for highlight
+  const activeChannelId = pathname.match(/^\/messagerie\/([0-9a-f-]+)$/)?.[1];
+  const activeConversationId = pathname.match(/^\/messagerie\/dm\/([0-9a-f-]+)$/)?.[1];
+
+  return (
+    <div className="flex h-full w-full flex-col">
+      <div className="border-b p-4">
+        <h2 className="text-lg font-semibold">Messagerie</h2>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b">
+        <button
+          onClick={() => setActiveTab("channels")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors",
+            activeTab === "channels"
+              ? "border-b-2 border-primary text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Hash className="h-4 w-4" />
+          Channels
+        </button>
+        <button
+          onClick={() => setActiveTab("dms")}
+          className={cn(
+            "flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors",
+            activeTab === "dms"
+              ? "border-b-2 border-primary text-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Mail className="h-4 w-4" />
+          Messages
+          {conversations && conversations.some((c: any) => c.hasUnread) && (
+            <span className="h-2 w-2 rounded-full bg-primary" />
+          )}
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {activeTab === "channels" ? (
+          <div className="space-y-4 p-3">
+            {channelsLoading ? (
+              <div className="space-y-3">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="mb-2 h-3 w-1/3 rounded bg-muted/40" />
+                    <div className="space-y-1.5">
+                      <div className="h-7 rounded-md bg-muted/50" />
+                      <div className="h-7 w-5/6 rounded-md bg-muted/30" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              channelGroups.map((group) => {
+                const groupChannels =
+                  (channelsByCategory as Record<string, Channel[]> | undefined)?.[group.key] ?? [];
+                if (groupChannels.length === 0) return null;
+                return (
+                  <div key={group.key}>
+                    <p className="mb-1 px-2 text-xs font-semibold uppercase text-muted-foreground">
+                      {group.emoji} {group.label}
+                    </p>
+                    {groupChannels.map((channel) => (
+                      <Link
+                        key={channel.id}
+                        href={`/messagerie/${channel.id}`}
+                        onMouseEnter={() =>
+                          utils.message.list.prefetch({ channelId: channel.id })
+                        }
+                        className={cn(
+                          "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                          activeChannelId === channel.id
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                      >
+                        <Hash className="h-3.5 w-3.5" />
+                        {channel.displayName}
+                        {channel.unreadCount > 0 && (
+                          <span className="ml-auto rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+                            {channel.unreadCount}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="p-3">
+            <button
+              onClick={() => setShowNewDm(!showNewDm)}
+              className="mb-3 flex w-full items-center gap-2 rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              <Plus className="h-4 w-4" />
+              Nouveau message
+            </button>
+
+            {showNewDm && (
+              <div className="mb-3 space-y-2 rounded-lg border bg-card p-3">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={dmSearch}
+                    onChange={(e) => setDmSearch(e.target.value)}
+                    placeholder="Rechercher un membre..."
+                    autoFocus
+                    className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-3 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                </div>
+                {searchResults?.items && searchResults.items.length > 0 && (
+                  <div className="max-h-40 space-y-1 overflow-y-auto">
+                    {searchResults.items.map((member: any) => (
+                      <button
+                        key={member.id}
+                        onClick={() => createConversation.mutate({ memberId: member.id })}
+                        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                      >
+                        {member.avatarUrl ? (
+                          <img src={member.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                            {member.firstName[0]}{member.lastName[0]}
+                          </div>
+                        )}
+                        <div className="text-left">
+                          <p className="font-medium">{member.firstName} {member.lastName}</p>
+                          {member.profession && (
+                            <p className="text-xs text-muted-foreground">{member.profession}</p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {dmsLoading ? (
+              <div className="space-y-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-14 animate-pulse rounded-md bg-muted" />
+                ))}
+              </div>
+            ) : conversations && conversations.length > 0 ? (
+              <div className="space-y-1">
+                {conversations.map((conv: any) => {
+                  const other = conv.otherParticipants[0];
+                  if (!other) return null;
+                  const isActive = activeConversationId === conv.id;
+                  return (
+                    <Link
+                      key={conv.id}
+                      href={`/messagerie/dm/${conv.id}`}
+                      onMouseEnter={() => utils.message.list.prefetch({ conversationId: conv.id })}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
+                        isActive
+                          ? "bg-accent"
+                          : conv.hasUnread
+                          ? "bg-accent/50 hover:bg-accent"
+                          : "hover:bg-accent"
+                      )}
+                    >
+                      {other.avatarUrl ? (
+                        <img src={other.avatarUrl} alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+                          {other.firstName[0]}{other.lastName[0]}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className={cn("text-sm", conv.hasUnread ? "font-semibold" : "font-medium")}>
+                            {other.firstName} {other.lastName}
+                          </p>
+                          {conv.lastMessage && (
+                            <span className="text-xs text-muted-foreground">
+                              {formatTime(conv.lastMessage.createdAt)}
+                            </span>
+                          )}
+                        </div>
+                        <p className={cn(
+                          "truncate text-xs",
+                          conv.hasUnread ? "font-medium text-foreground" : "text-muted-foreground"
+                        )}>
+                          {formatLastMessage(conv.lastMessage)}
+                        </p>
+                      </div>
+                      {conv.hasUnread && (
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-muted-foreground">
+                <User className="mx-auto h-10 w-10 opacity-20" />
+                <p className="mt-3 text-sm">Aucune conversation</p>
+                <p className="mt-1 text-xs">{"Cliquez sur « Nouveau message » pour démarrer"}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
