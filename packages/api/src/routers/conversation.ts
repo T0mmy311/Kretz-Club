@@ -231,6 +231,21 @@ export const conversationRouter = router({
 
       return conversation;
     }),
+
+  markRead: protectedProcedure
+    .input(z.object({ conversationId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await prisma.conversationParticipant.update({
+        where: {
+          conversationId_memberId: {
+            conversationId: input.conversationId,
+            memberId: ctx.member.id,
+          },
+        },
+        data: { lastReadAt: new Date() },
+      });
+      return { success: true };
+    }),
 });
 
 // ---------------------------------------------------------------------------

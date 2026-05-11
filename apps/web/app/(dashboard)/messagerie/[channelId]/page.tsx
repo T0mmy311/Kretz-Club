@@ -481,10 +481,17 @@ export default function ChannelPage({
   }, [currentChannel]);
 
   // -- mark channel read ------------------------------------------------------
-  const markRead = trpc.channel.markRead.useMutation();
+  const markRead = trpc.channel.markRead.useMutation({
+    onSuccess: () => {
+      // Refresh unread counts and channel list so badges update immediately
+      utils.readStatus.getUnreadCounts.invalidate();
+      utils.channel.list.invalidate();
+    },
+  });
   useEffect(() => {
     if (channelId) markRead.mutate({ channelId });
     inputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelId]);
 
   // -- Supabase Realtime: messages + typing -----------------------------------

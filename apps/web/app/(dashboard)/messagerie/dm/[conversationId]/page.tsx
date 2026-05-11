@@ -554,6 +554,18 @@ export default function ConversationPage({
     inputRef.current?.focus();
   }, [conversationId]);
 
+  // -- mark conversation as read ---------------------------------------------
+  const markRead = trpc.conversation.markRead.useMutation({
+    onSuccess: () => {
+      utils.conversation.list.invalidate();
+      utils.readStatus.getUnreadCounts.invalidate();
+    },
+  });
+  useEffect(() => {
+    if (conversationId) markRead.mutate({ conversationId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId]);
+
   // -- handlers ---------------------------------------------------------------
   const broadcastTyping = useCallback(() => {
     if (!myId || !meData) return;
